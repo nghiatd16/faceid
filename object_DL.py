@@ -1,13 +1,13 @@
 class Camera:
-    def __init__(self, id=None, name=None, httpurl=None, rstpurl=None, location=None):
+    def __init__(self, id=None, cameraname=None, httpurl=None, rstpurl=None, location=None):
         self.id = id
-        self.name = name
+        self.cameraname = cameraname
         self.httpurl = httpurl
         self.rstpurl = rstpurl
         self.location = location
 
     def get_arr_name_columns(self):
-        return ["id", "name", "httpurl", "rstpurl", "idlocation"]
+        return ["idcamera", "cameraname", "httpurl", "rstpurl", "idlocation"]
 
     def get_name_columns(self):
         arr = self.get_arr_name_columns()
@@ -25,7 +25,7 @@ class Camera:
         self.idlocation = None
         if self.location is not None and isinstance(self.location, Location):
             self.idlocation = self.location.id
-        return (self.id, self.name, self.httpurl, self.rstpurl, self.idlocation)
+        return (self.id, self.cameraname, self.httpurl, self.rstpurl, self.idlocation)
 
 class Image:
     def __init__(self, id=None, person=None, camera=None, time=None, b64image=None, b64face=None, embedding=None, istrained=None):
@@ -39,7 +39,7 @@ class Image:
         self.istrained = istrained
 
     def get_arr_name_columns(self):
-        return ["id", "idperson", "idcamera", "time", "b64image", "b64face", "embedding", "istrained"]
+        return ["idimage", "idperson", "idcamera", "time", "b64image", "b64face", "embedding", "istrained"]
 
     def get_name_columns(self):
         arr = self.get_arr_name_columns()
@@ -70,7 +70,7 @@ class Location:
         self.location = location
 
     def get_arr_name_columns(self):
-        return ["id", "longtitude", "latitude", "location"]
+        return ["idlocation", "longtitude", "latitude", "location"]
 
     def get_name_columns(self):
         arr = self.get_arr_name_columns()
@@ -99,7 +99,7 @@ class Person:
         self.b64image = b64image
 
     def get_arr_name_columns(self):
-        return ["id", "name", "age", "gender", "idcode", "embedding", "b64face", "b64image"]
+        return ["idperson", "name", "age", "gender", "idcode", "embedding", "b64face", "b64image"]
 
     def get_name_columns(self):
         arr = self.get_arr_name_columns()
