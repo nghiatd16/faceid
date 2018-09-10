@@ -89,15 +89,13 @@ def online_learning(bbox_faces, img_faces, infor_pack, vision_object, multiTrack
     b64Img = manage_data.convert_image_to_b64(img_faces[1])
 
     new_person = Person(None, name, age, gender, idCode, embed_vector, b64Face,  b64Img)
-    from interact_database_DL import Database
-    database.insertValuesIntoPerson(new_person)
+    new_person = database.insertPerson(new_person)
     database.refetch_table('person')
-    person = database.selectFromPerson(new_person)[0]
+    # person = database.getPer(new_person)[0]
     time = vision_config.get_time()
     cam = Camera(id = idCam)
-    new_image = Image(None, person, cam, time, b64Img, b64Face, embed_vector, False)
-    logging.info("New Image new_image.idPerson = {}".format(new_image.person))
-    database.insertValuesIntoImage(new_image)
+    new_image = Image(None, new_person, cam, time, b64Img, b64Face, embed_vector, False)
+    database.insertImage(new_image)
     # database.refetch_table('image')
     # feature_db, thumb_db = {}, {}
     # if database is not None:

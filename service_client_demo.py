@@ -9,7 +9,7 @@ import numpy as np
 import vision_config
 import manage_data
 from TrackingFace import MultiTracker
-from interact_database_DL import Database
+from interact_database_v2 import Database
 from object_DL import Person, Camera, Location, Image
 # from Vision import Vision
 
@@ -106,11 +106,11 @@ def client(thread_idx):
                     else:
                         logging.info("{} - {} - {}".format(tracker.person.id, tracker.person.name, tracker.receive))
                     predict_id = int(msg)
-                    predicts = [None]
+                    predicts = None
                     if predict_id != -1:
                         pred_p = Person(id=predict_id)
-                        predicts = database.selectFromPerson(pred_p)
-                    multi_tracker.update_identification([tracker], predicts)
+                        predicts = database.getPersonById(pred_p.id)
+                    multi_tracker.update_identification([tracker], [predicts])
         # t2 = time.time()
         if len(unidentified_tracker) > 0:
             for tracker in unidentified_tracker:
@@ -122,16 +122,11 @@ def client(thread_idx):
                     msg = np.array([len_ID], dtype=np.uint8).tobytes() + str.encode(ID) + face.tobytes()
                     r_remote.lpush(vision_config.IDENTIFY_QUEUE, msg)
                     
-                    logging.info("Send an request. Delay time: {}s".format(time.time()- tracker.last_time_tried))
+                    # logging.info("Send an request. Delay time: {}s".format(time.time()- tracker.last_time_tried))
                     tracker.last_time_tried = time.time()
                     tracker.tried += 1
-        # t3 = time.time()
-        # logging.info("{} {}".format(t2-t1, t3-t2))
     
         multi_tracker.show_info(frame)
-        # except:
-        #     continue
-        #     pass
         cv2.putText(frame, 'FPS ' + str(fps), \
                     vision_config.FPS_POS, cv2.FONT_HERSHEY_SIMPLEX, \
                     vision_config.FONT_SIZE, vision_config.POS_COLOR, \

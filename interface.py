@@ -11,6 +11,7 @@ label = None
 def response_OK(text):
     global STATUS, label
     label = text
+    print(label)
     STATUS = STATUS_DONE
 
 def response_cancel():
@@ -46,11 +47,11 @@ def layout_text():
     STATUS = STATUS_INPROGRESS
     label = None
     root = Tk()
-    root.title("Name Class")
+    root.title("Thong Tin Nhan Vien")
     # root.geometry("500x50+100+100")
     row = Frame(root)
-    lab = Label(row, text="Label", width=5, font=(16), anchor='w')
-    ent = Entry(row, width=15, font=16)
+    lab = Label(row, text="Ma Nhan Vien", width=12, font=(16), anchor='w')
+    ent = Entry(row, width=18, font=16)
     # e1.grid(row=0, column = 1)
     row.pack(side=TOP, fill=X, padx=5, pady=5)
     lab.pack(side=LEFT)
@@ -76,3 +77,4 @@ def layout_text():
     center(root)
     root.mainloop()
     root.destroy()
+# layout_text()

@@ -10,7 +10,7 @@ import interface
 import threading
 import queue
 import logging
-from interact_database_DL import Database
+from interact_database_v2 import Database
 from object_DL import Person, Image, Camera, Location
                     
 name_interface = None

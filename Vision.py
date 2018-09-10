@@ -8,7 +8,7 @@ import time
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 from external_lib import facenet
-from interact_database_DL import Database
+from interact_database_v2 import Database
 from object_DL import Person, Image, Camera, Location
 from tensorflow.contrib import predictor
 import logging
@@ -33,7 +33,7 @@ class Vision:
         if mode != 'only_identify':
             self.__pnet, self.__rnet, self.__onet = self.load_detect_face_model(device= vision_config.DETECT_DEVICE)
         if mode != 'only_detect':
-            self.__feature, self.__label, self.__person = database.extract_features_and_labels()
+            self.__person, self.__feature, self.__label = database.extract_features_labels()
             if len(self.__feature) > 0:
                 self.__database_empty = False
                 self.__classifier.fit(self.__feature, self.__label)
@@ -44,7 +44,7 @@ class Vision:
     def update_new_database(self, database):
         if self.mode == 'only_detect':
             raise Exception("vision_object is on mode only_detect, doesn't support update database")
-        self.__feature, self.__label, self.__person = database.extract_features_and_labels()
+        self.__person, self.__feature, self.__label = database.extract_features_labels()
         self.__database_empty = False
         self.__classifier.fit(self.__feature, self.__label)
 
