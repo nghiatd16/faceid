@@ -1,0 +1,13 @@
+.vscode/
+__pycache__/
+database/
+export_model/
+images/
+model/
+align/__pycache__/
+mtcnn_pb/
+raw_data/
+Wrong_Identify/
+convert_meta_data.py
+test.py
+*.jpg/

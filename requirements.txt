@@ -1,0 +1,7 @@
+tensorflow
+opencv-python
+opencv-contrib-python
+numpy
+scipy
+scikit-learn
+redis
