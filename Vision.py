@@ -10,6 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from external_lib import facenet
 from interact_database_DL import Database
 from object_DL import Person, Image, Camera, Location
+from tensorflow.contrib import predictor
 import logging
                     
 class Vision:
@@ -26,17 +27,13 @@ class Vision:
             raise TypeError("You have to pass database with mode '{}'".format(mode))
         logging.info("An vision object has been created with mode `{}`".format(mode))
         if mode != 'only_detect':
-            graph, self.__sess = self.load_facenet(device= vision_config.ENCODE_EMBEDD_DEVICE)
-            self.__images_placeholder = graph.get_tensor_by_name("input:0")
-            self.__embeddings = graph.get_tensor_by_name("embeddings:0")
-            self.__phase_train_placeholder = graph.get_tensor_by_name("phase_train:0")
+            self.__embedding_encoder = predictor.from_saved_model("exported_model")
             self.__database_empty = True
             self.__classifier = KNeighborsClassifier(n_neighbors=5, algorithm='ball_tree', weights='distance')
         if mode != 'only_identify':
             self.__pnet, self.__rnet, self.__onet = self.load_detect_face_model(device= vision_config.DETECT_DEVICE)
         if mode != 'only_detect':
-            self.__feature, self.__label = database.extract_features_and_labels()
-            self.__person = database.get_list_person_in_id_order(self.__label)
+            self.__feature, self.__label, self.__person = database.extract_features_and_labels()
             if len(self.__feature) > 0:
                 self.__database_empty = False
                 self.__classifier.fit(self.__feature, self.__label)
@@ -47,28 +44,9 @@ class Vision:
     def update_new_database(self, database):
         if self.mode == 'only_detect':
             raise Exception("vision_object is on mode only_detect, doesn't support update database")
-        self.__feature, self.__label = database.extract_features_and_labels()
-        self.__person = database.get_list_person_in_id_order(self.__label)
+        self.__feature, self.__label, self.__person = database.extract_features_and_labels()
         self.__database_empty = False
         self.__classifier.fit(self.__feature, self.__label)
-
-    @staticmethod
-    def load_facenet(device = 'auto', model_dir = 'default'):
-        if model_dir == 'default':
-            model_dir = vision_config.MODEL_DIR
-        if not os.path.isdir(model_dir):
-            raise FileNotFoundError('No model found in ',
-                                os.path.abspath(model_dir))
-        graph = tf.Graph()
-        if 'cpu' in device:
-            config = tf.ConfigProto(device_count = {'GPU': 0})
-            sess = tf.Session(graph=graph, config=config)
-        else: 
-            sess = tf.Session(graph= graph)
-        with graph.as_default():
-            with sess.as_default():
-                facenet.load_model(model_dir)
-        return (graph, sess)
 
     @staticmethod
     def load_detect_face_model(device = 'auto'):
@@ -152,12 +130,10 @@ class Vision:
     def encode_embeddings(self, img_list):
         if self.mode == 'only_detect':
             raise Exception('vision_object is on mode only_detect, cannot encode faces to embedding vectors')
-        with self.__sess.as_default():
-            images = facenet.load_data(img_list, False, False, Vision.SIZE_OF_INPUT_IMAGE)
-            feed_dict = {self.__images_placeholder: images,
-                        self.__phase_train_placeholder: False}
-            emb_array = self.__sess.run(self.__embeddings, feed_dict=feed_dict)
-            return emb_array
+        images = facenet.load_data(img_list, False, False, Vision.SIZE_OF_INPUT_IMAGE)
+        feed_dict = {"images": images, "phase": False}
+        emb_array = self.__embedding_encoder(feed_dict)["embeddings"]
+        return emb_array
 
 
     def identify_person_by_tracker(self, frame, unidentified_trackers):

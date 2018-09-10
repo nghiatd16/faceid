@@ -1,7 +1,6 @@
 .vscode/
 __pycache__/
 database/
-export_model/
 images/
 model/
 align/__pycache__/

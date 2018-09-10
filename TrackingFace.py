@@ -86,13 +86,13 @@ class MultiTracker:
             if tracker.person is not None or tracker.receive >= vision_config.NUM_TRIED:
                 if tracker.person is not None and tracker.image is not None:
                     b64_img = manage_data.convert_image_to_b64(tracker.image)
-                    new_image = Image(None, tracker.person, 1, vision_config.get_time(),b64_img, b64_img, None, False)
+                    new_image = Image(None, tracker.person, Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
                     database.insertValuesIntoImage(new_image)
                     tracker.image = None
                 elif tracker.image is not None:
                     b64_img = database.convert_image_to_b64(tracker.image)
                     tracker.image = None
-                    new_image = Image(None, Person(id=-1), 1, vision_config.get_time(),b64_img, b64_img, None, False)
+                    new_image = Image(None, Person(id=-1), Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
                     database.insertValuesIntoImage(new_image)
         control_tracking_object(self)
 

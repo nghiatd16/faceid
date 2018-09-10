@@ -625,7 +625,7 @@ class Database:
         for person in all_person:
             emb_all.append(manage_data.convert_bytes_to_embedding_vector(person.embedding))
             label_all.append(person.id)
-        return (emb_all, label_all)
+        return (emb_all, label_all, all_person)
 
     def get_list_person_in_id_order(self, list_id):
         rs = []
