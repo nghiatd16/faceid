@@ -12,23 +12,25 @@ logging.basicConfig(format='[%(levelname)s|%(asctime)s] %(message)s',
                     level=logging.DEBUG)
 
 class TrackingPerson:
-    def __init__(self, person, statistic, bounding_box, last_time, tried, unk_images):
+    def __init__(self, person, statistic, bounding_box, last_appearance, last_time_tried, tried, unk_images):
         self.id = str(uuid.uuid4())
         self.person = person
         self.statistic = statistic
         self.bounding_box = bounding_box
-        self.last_time = last_time
+        self.last_appearance = last_appearance
+        self.last_time_tried = last_time_tried
         self.unk_images = unk_images
         self.tried = tried
         self.receive = 0
         self.image = None
     def set_image(self, image):
         self.image = image;
-    def update_all(self, person, statistic, bounding_box, last_time, tried, unk_images):
+    def update_all(self, person, statistic, bounding_box, last_appearance, last_time_tried, tried, unk_images):
         self.person = person
         self.statistic = statistic
         self.bounding_box = bounding_box
-        self.last_time = last_time
+        self.last_appearance = last_appearance
+        self.last_time_tried = last_time_tried
         self.tried = tried
         self.unk_images = unk_images
     def update_bounding_box(self, bounding_box):
@@ -48,14 +50,14 @@ class MultiTracker:
 
     @staticmethod
     def percent_intersecting(bbox1, bbox2):
-        left = max(bbox1[0], bbox2[0])
-        right = min(bbox1[0] + bbox1[2], bbox2[0] + bbox2[2])
-        bottom = min(bbox1[1] + bbox1[3], bbox2[1] + bbox2[3])
-        top = max(bbox1[1], bbox2[1])
+        left = int(max(bbox1[0], bbox2[0]))
+        right = int(min(bbox1[0] + bbox1[2], bbox2[0] + bbox2[2]))
+        bottom = int(min(bbox1[1] + bbox1[3], bbox2[1] + bbox2[3]))
+        top = int(max(bbox1[1], bbox2[1]))
 
         if left < right and bottom > top:
-            s1 = bbox1[2]*bbox1[3]
-            s2 = bbox2[2]*bbox2[3]
+            s1 = int(bbox1[2])*int(bbox1[3])
+            s2 = int(bbox2[2])*int(bbox2[3])
             intersecting_area = (right-left)*(bottom-top)
             return round((intersecting_area/(s1+s2-intersecting_area))*100)
         else :
@@ -66,22 +68,23 @@ class MultiTracker:
             num_del = 0 
             cur_time = time.time()
             for idx in range(len(self.__multiTracker)):
-                if cur_time - self.__multiTracker[idx-num_del].last_time >= 0.3:
+                if cur_time - self.__multiTracker[idx-num_del].last_appearance >= 0.3:
                     del self.__multiTracker[idx-num_del]
                     if vision_config.SHOW_LOG_TRACKING:
                         now = vision_config.get_time()
                         logging.warning('An object has been stopped tracking!')
                         logging.info('Number of tracker remainings: {}'.format(len(self.__multiTracker)))
                     num_del += 1
+                    
         for bbox in bbox_faces:
             x, y, w, h = bbox
             find_tracker = self.has_tracker_control_object(bbox)
             if find_tracker == -1:
-                self.__multiTracker.append(TrackingPerson(None, {'Unknown': 1}, bbox, time.time(), 0, []))
+                self.__multiTracker.append(TrackingPerson(None, {'Unknown': 1}, bbox, time.time(), time.time()-vision_config.DELAY_TRIED, 0, []))
             else:
                 tracker = self.__multiTracker[find_tracker]
                 tracker.update_bounding_box(bbox)
-                tracker.last_time = time.time()
+                tracker.last_appearance = time.time()
         for tracker in self.__multiTracker:
             if tracker.person is not None or tracker.receive >= vision_config.NUM_TRIED:
                 if tracker.person is not None and tracker.image is not None:
@@ -90,7 +93,7 @@ class MultiTracker:
                     database.insertValuesIntoImage(new_image)
                     tracker.image = None
                 elif tracker.image is not None:
-                    b64_img = database.convert_image_to_b64(tracker.image)
+                    b64_img = manage_data.convert_image_to_b64(tracker.image)
                     tracker.image = None
                     new_image = Image(None, Person(id=-1), Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
                     database.insertValuesIntoImage(new_image)

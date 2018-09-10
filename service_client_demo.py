@@ -114,14 +114,17 @@ def client(thread_idx):
         # t2 = time.time()
         if len(unidentified_tracker) > 0:
             for tracker in unidentified_tracker:
-                if tracker.person is None and tracker.tried < vision_config.NUM_TRIED:
+                if tracker.person is None and tracker.tried < vision_config.NUM_TRIED and time.time() - tracker.last_time_tried >= vision_config.DELAY_TRIED:
                     len_ID = len(tracker.id)
                     ID = tracker.id
                     face = tracker.get_bbox_image(frame)
                     tracker.set_image(face)
                     msg = np.array([len_ID], dtype=np.uint8).tobytes() + str.encode(ID) + face.tobytes()
                     r_remote.lpush(vision_config.IDENTIFY_QUEUE, msg)
-                tracker.tried += 1
+                    
+                    logging.info("Send an request. Delay time: {}s".format(time.time()- tracker.last_time_tried))
+                    tracker.last_time_tried = time.time()
+                    tracker.tried += 1
         # t3 = time.time()
         # logging.info("{} {}".format(t2-t1, t3-t2))
     

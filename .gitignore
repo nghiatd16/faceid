@@ -2,6 +2,7 @@
 __pycache__/
 database/
 images/
+exported_model/
 model/
 align/__pycache__/
 mtcnn_pb/
