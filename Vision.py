@@ -194,6 +194,7 @@ class Vision:
         if self.mode == 'only_detect':
             raise Exception('vision_object is on mode only_detect, cannot identify person')
         prediction = []
+        embedding_list = []
         if resize:
             new_img_faces = []
             for im in img_faces:
@@ -238,7 +239,7 @@ class Vision:
                         logging.info('prediction: {}; verdict: {}; distance: {}'.format(predict_text, 
                                                                                         self.__person[preds].name, 
                                                                                         distances[i]))
-        return prediction
+        return (embedding_list, prediction)
 
     @staticmethod
     def face_in_training_area(frame, bbox_faces, training_area):

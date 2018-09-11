@@ -17,6 +17,8 @@ name_interface = None
 q_frame = queue.Queue(maxsize=2)
 q_faces = queue.Queue(maxsize=2)
 q_identify = queue.Queue(maxsize=2)
+
+q_frame_web = queue.Queue(maxsize=2)
 RUNNING = True
 
 flag_training_online = False
@@ -25,6 +27,8 @@ flag_take_photo = False
 database = None
 vision_object = None
 multi_tracker = None
+
+
 
 def read_camrea(url=0):
     global RUNNING
@@ -127,8 +131,6 @@ def identify():
             if flag_take_photo == False and len(bbox_list_online) > 0:
                 learning.online_learning(bbox_list_online, img_list_online, \
                                                     infor_pack, vision_object, multi_tracker, database)
-                if vision_config.SAVE_DATABASE:
-                    manage_data.save_database_into_disk(database, vision_config.DATABASE_DIR, vision_config.DATABASE_NAME_SAVE)
                 infor_pack = None
                 bbox_list_online.clear()
                 img_list_online.clear()
@@ -151,7 +153,13 @@ def show():
                     vision_config.FONT_SIZE, vision_config.POS_COLOR, \
                     vision_config.LINE_THICKNESS, cv2.LINE_AA)
                 
-        cv2.imshow('Face ID', frame)
+        # cv2.imshow('Face ID', frame)
+        ret, jpeg = cv2.imencode('.jpg', frame)
+        fr = jpeg.tobytes()
+
+        if q_frame_web.full():
+            q_frame_web.get()
+        q_frame_web.put(fr)
         # if (interface.STATUS == interface.STATUS_DONE):
         #     flag_training_online = True
         #     name_interface = interface.label

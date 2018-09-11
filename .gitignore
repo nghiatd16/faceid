@@ -4,7 +4,7 @@ database/
 images/
 exported_model/
 model/
-align/__pycache__/
+align/
 mtcnn_pb/
 raw_data/
 Wrong_Identify/

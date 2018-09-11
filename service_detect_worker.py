@@ -4,7 +4,6 @@ import time
 import vision_config
 import uuid
 import manage_data
-import vision_config
 import numpy as np
 
 from Vision import Vision
@@ -16,7 +15,6 @@ class FaceDetectionWorker:
     def __init__(self):
         self.RUNNING = True
 
-        # database = manage_data.read_database_from_disk(vision_config.DATABASE_DIR, vision_config.DATABASE_NAME_LOAD)
         self.vision_object = Vision(mode='only_detect')
         self.multi_tracker = MultiTracker()
 
@@ -63,7 +61,7 @@ class FaceDetectionWorker:
                 self.rd.set(self.OUT, face.tobytes())
             time.sleep(0.001)
 
-if __name__ == '__main__':
-    worker = FaceDetectionWorker()
-    worker.register_work_service()
-    worker.run_service()
+# if __name__ == '__main__':
+#     worker = FaceDetectionWorker()
+#     worker.register_work_service()
+#     worker.run_service()

@@ -29,27 +29,33 @@ class FaceIdentifyService:
         while True:
             faces = []
             IDs = []
+            modes = []
             while True:
                 msg = self.rd.rpop(self.key)
                 if msg is None:
                     break
                 len_ID = int(msg[0])
                 ID = msg[1:1+len_ID].decode('utf-8')
-                face = np.frombuffer(msg[1+len_ID:], dtype=np.uint8)
+                mode = msg[len_ID+1:len_ID+2].decode('utf-8')
+                print(mode, type(mode))
+                face = np.frombuffer(msg[2+len_ID:], dtype=np.uint8)
                 if len(face) == 76800:
                     face = np.reshape(face, (160, 160, 3))
                     IDs.append(ID)
+                    modes.append(mode)
                     faces.append(face)
                 if len(faces) == vision_config.BATCH:
                     break
             if len(faces) > 0:
-                predictions = self.vision_object.identify_person_by_img(faces)
+                embedding_list, predictions = self.vision_object.identify_person_by_img(faces)
                 for i in range(len(IDs)):
-                    if predictions[i] is not None:
-                        self.rd.lpush(IDs[i], predictions[i].id)
+                    if modes[i] == vision_config.IDEN_MOD:
+                        if predictions[i] is not None:
+                            self.rd.lpush(IDs[i], modes[i], predictions[i].id)
+                        else:
+                            self.rd.lpush(IDs[i], modes[i], -1)
                     else:
-                        self.rd.lpush(IDs[i], -1)
-
-if __name__ == '__main__':
-    fis = FaceIdentifyService()
-    fis.run()
+                        self.rd.lpush(IDs[i], modes[i], manage_data.convert_embedding_vector_to_bytes(embedding_list[i]))
+# if __name__ == '__main__':
+#     fis = FaceIdentifyService()
+#     fis.run()

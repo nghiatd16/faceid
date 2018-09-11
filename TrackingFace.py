@@ -65,7 +65,7 @@ class MultiTracker:
             num_del = 0 
             cur_time = time.time()
             for idx in range(len(self.__multiTracker)):
-                if cur_time - self.__multiTracker[idx-num_del].last_appearance >= 0.3:
+                if cur_time - self.__multiTracker[idx-num_del].last_appearance >= 0.4:
                     del self.__multiTracker[idx-num_del]
                     if vision_config.SHOW_LOG_TRACKING:
                         now = vision_config.get_time()

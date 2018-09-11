@@ -1,11 +1,9 @@
 import redis
 import numpy as np
 import time
-import _thread
 import vision_config
-
 import logging
-
+from threading import Thread
 
 class FaceDetectionService():
     def __init__(self):
@@ -49,13 +47,16 @@ class FaceDetectionService():
 
 
         logging.info('Start register service worker...')
-        _thread.start_new_thread(self.register_service_worker, ())
+        Thread(target=self.register_service_worker).start()
+        # _thread.start_new_thread(self.register_service_worker, ())
 
         logging.info('Start register service client...')
-        _thread.start_new_thread(self.register_service_client, ())
+        Thread(target=self.register_service_client).start()
+        # _thread.start_new_thread(self.register_service_client, ())
 
         logging.info('Start guard timeout service...')
-        _thread.start_new_thread(self.guard_timeout_channel, ())
+        Thread(target=self.guard_timeout_channel).start()
+        # _thread.start_new_thread(self.guard_timeout_channel, ())
 
     def register_service_client(self):
         try:
@@ -154,8 +155,3 @@ class FaceDetectionService():
     def disconnet_channel_worker(self, idx):
         self.worker_KEY[idx] = None
         self.worker_STATUS[idx] = vision_config.WORKER_OFFLINE
-
-if __name__ == '__main__':
-    fd_service = FaceDetectionService()
-    while True:
-        time.sleep(0.1)
