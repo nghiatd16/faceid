@@ -47,8 +47,10 @@ class ClientService:
             while self.__FLAGS.RUNNING and self.capture.isOpened():
                 ret, frame = self.capture.read()
                 if ret and self.frame_queue.full():
-                    self.frame_queue.get()
-                self.frame_queue.put(np.copy(frame))
+                    self.frame_queue.get(timeout = 1)
+                self.frame_queue.put(np.copy(frame), timeout = 1)
+                # cv2.imshow("tmp", frame)
+                # cv2.waitKey(1)
         threading.Thread(target=__rec, args=(self,)).start()
     
     def subscribe_server(self):
@@ -72,7 +74,6 @@ class ClientService:
         if msg is None or msg == b'NONE':
             logging.info('Server is busy!')
             self.detect_service_line.delete(cid)
-            # RUNNING = False
             return
         info = msg.split()
         IN = info[0]
@@ -92,17 +93,24 @@ class ClientService:
     def request_detect_service(self, frame):
         IN = self.subscribed_server_info["IN"]
         timer = time.time()
-        bytebuf = np.array([frame.shape[0], frame.shape[1], frame.shape[2]], dtype=np.uint16).tobytes() + frame.tobytes()
+        ret, jpeg = cv2.imencode(".jpg", frame)
+        bytebuf = jpeg.tobytes()
+        print("bytebuf", time.time()- timer)
+        timer = time.time()
         self.detect_service_line.ltrim(IN, 0, 0)
+        print("ltrim", time.time() - timer)
+        timer = time.time()
         self.detect_service_line.lpush(IN, bytebuf)
+        print("lpush", time.time() - timer)
 
-    def get_response_detect_service(self):
+    def get_response_detect_service(self, real_time = False):
         OUT = self.subscribed_server_info["OUT"]
         while not self.detect_service_line.exists(OUT):
             time.sleep(0.001)
             continue
         bboxes = np.frombuffer(self.detect_service_line.get(OUT), dtype=np.uint16)
-        self.detect_service_line.delete(OUT)
+        if not real_time:
+            self.detect_service_line.delete(OUT)
         ret = False
         if len(bboxes) > 0:
             bboxes = np.reshape(bboxes, (-1, 4))
@@ -117,7 +125,8 @@ class ClientService:
         if face.shape != (160, 160, 3):
             logging.error("Face Image must have shape (160, 160, 3), got {}".format(face.shape))
             return
-        msg = np.array([len(tracker_id)], dtype=np.uint8).tobytes() + str.encode(tracker_id) + str.encode(mode) + face.tobytes()
+        ret, jpeg = cv2.imencode(".jpg", face)
+        msg = np.array([len(tracker_id)], dtype=np.uint8).tobytes() + str.encode(tracker_id) + str.encode(mode) + jpeg.tobytes()
         self.identify_service_line.lpush(vision_config.IDENTIFY_QUEUE, msg)
 
     def get_response_identify_service(self, tracker_id):
@@ -126,7 +135,6 @@ class ClientService:
         if msg is not None:
             mode = msg.decode("utf-8")
             content = self.identify_service_line.rpop(tracker_id)
-            # print(mode, content)
             if mode == vision_config.ENCODE_MOD:
                 ret = manage_data.convert_bytes_to_embedding_vector(content)
             else:
@@ -138,5 +146,5 @@ class ClientService:
         return (None, None)
 
     def get_frame_from_queue(self):
-        frame = self.frame_queue.get()
+        frame = self.frame_queue.get(timeout = 1)
         return frame

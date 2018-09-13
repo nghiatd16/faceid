@@ -77,4 +77,6 @@ def layout_text():
     center(root)
     root.mainloop()
     root.destroy()
+if __name__ = "__main__":
+    layout_text()
 # layout_text()

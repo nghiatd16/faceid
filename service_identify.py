@@ -37,10 +37,12 @@ class FaceIdentifyService:
                 len_ID = int(msg[0])
                 ID = msg[1:1+len_ID].decode('utf-8')
                 mode = msg[len_ID+1:len_ID+2].decode('utf-8')
-                print(mode, type(mode))
+                # print(mode, type(mode))
                 face = np.frombuffer(msg[2+len_ID:], dtype=np.uint8)
-                if len(face) == 76800:
-                    face = np.reshape(face, (160, 160, 3))
+                face = cv2.imdecode(face, cv2.IMREAD_COLOR)
+                # print(face.shape)
+                if face.shape == (160, 160, 3):
+                    # face = np.reshape(face, (160, 160, 3))
                     IDs.append(ID)
                     modes.append(mode)
                     faces.append(face)

@@ -272,7 +272,7 @@ class Database:
 
     def getCameraById(self, idCamera):
         if self.CONNECTED:
-            sql = "SELECT * FROM location WHERE idCamera = {}".format(idCamera)
+            sql = "SELECT * FROM camera JOIN location ON camera.idLocation = location.idLocation WHERE idCamera = {}".format(idCamera)
             try:
                 self.__mycursor.execute(sql)
                 rows = self.__mycursor.fetchall()

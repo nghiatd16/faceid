@@ -51,11 +51,12 @@ class FaceDetectionWorker:
         while self.RUNNING:
             msg = self.rd.rpop(self.IN)
             if msg is not None:
-                shape_buffer = msg[:6]
-                frame_buffer = msg[6:]
-                shape = np.frombuffer(shape_buffer, dtype=np.uint16)
+                # shape_buffer = msg[:6]
+                frame_buffer = msg
+                # shape = np.frombuffer(shape_buffer, dtype=np.uint16)
                 frame = np.frombuffer(frame_buffer, dtype=np.uint8)
-                frame = np.reshape(frame, (shape[0], shape[1], shape[2]))
+                frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
+                # frame = np.reshape(frame, (shape[0], shape[1], shape[2]))
                 face = self.vision_object.face_detector(frame)
                 face = np.array(face, dtype=np.uint16)
                 self.rd.set(self.OUT, face.tobytes())
