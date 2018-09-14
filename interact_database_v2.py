@@ -12,6 +12,7 @@ class Database:
         self.__dbname = database_name
         try:
             self.__mydb = mysql.connector.connect(host=self.__host, user=self.__user, passwd=self.__pass, database=self.__dbname)
+            self.__mydb.autocommit = True
             self.__mycursor = self.__mydb.cursor(dictionary=True)
             self.CONNECTED = True
             logging.info("Connect to database sucessfull")
@@ -74,16 +75,7 @@ class Database:
             except mysql.connector.Error as err:
                 logging.exception("ERR in infoColumnsTable: {}".format(err))
 
-    def refetch_table(self, table):
-        if self.CONNECTED:
-            query = "SELECT * FROM " + str(table)
-            self.__mycursor.execute(query)
-            self.__mycursor.fetchall()
-            logging.info("Refetch table `{}` successfull".format(table))
-        else:
-            logging.error("Cannot access to database")
 ## Insert database:
-    
     def insertPerson(self, person):
         """ Insert new person into database
         @params person: Person

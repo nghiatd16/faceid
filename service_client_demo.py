@@ -36,12 +36,16 @@ class ClientService:
             self.capture = cv2.VideoCapture(0)
             logging.info("Video Capture device is default webcam")
         self.capture.set(cv2.CAP_PROP_FPS, 60)
-            
+        width = self.capture.get(3)
+        height = self.capture.get(4)
+        vision_config.set_screen_size(width, height)
         self.frame_queue = queue.Queue(maxsize=2)
 
     def is_running(self):
         return self.__FLAGS.RUNNING
 
+    def send_refetch_db_signal(self):
+        self.detect_service_line.set(vision_config.FLAG_REFETCH_DB, b"1")
     def record(self):
         def __rec(self):
             while self.__FLAGS.RUNNING and self.capture.isOpened():
@@ -92,16 +96,10 @@ class ClientService:
 
     def request_detect_service(self, frame):
         IN = self.subscribed_server_info["IN"]
-        timer = time.time()
         ret, jpeg = cv2.imencode(".jpg", frame)
         bytebuf = jpeg.tobytes()
-        print("bytebuf", time.time()- timer)
-        timer = time.time()
         self.detect_service_line.ltrim(IN, 0, 0)
-        print("ltrim", time.time() - timer)
-        timer = time.time()
         self.detect_service_line.lpush(IN, bytebuf)
-        print("lpush", time.time() - timer)
 
     def get_response_detect_service(self, real_time = False):
         OUT = self.subscribed_server_info["OUT"]
@@ -117,7 +115,7 @@ class ClientService:
             ret = True
         return (ret, bboxes)
     
-    def request_identify_service(self, face, tracker_id, mode):
+    def request_identify_service(self, face, tracker_id, mode, mode_push = "lpush"):
         if mode != vision_config.ENCODE_MOD and mode != vision_config.IDEN_MOD:
             logging.error("Doesn't support mode {}".format(mode))
             return
@@ -127,24 +125,62 @@ class ClientService:
             return
         ret, jpeg = cv2.imencode(".jpg", face)
         msg = np.array([len(tracker_id)], dtype=np.uint8).tobytes() + str.encode(tracker_id) + str.encode(mode) + jpeg.tobytes()
-        self.identify_service_line.lpush(vision_config.IDENTIFY_QUEUE, msg)
+        if mode_push == "lpush":
+            self.identify_service_line.lpush(vision_config.IDENTIFY_QUEUE, msg)
+        else:
+            self.identify_service_line.rpush(vision_config.IDENTIFY_QUEUE, msg)
 
-    def get_response_identify_service(self, tracker_id):
-        msg = self.identify_service_line.rpop(tracker_id)
+    def get_response_identify_service(self, tracker_id, mode_pop = "rpop"):
+        if mode_pop != "rpop" and mode_pop != "lpop":
+            raise TypeError("Doesn't support mode_pop `{}`".format(mode_pop))
+        if mode_pop == "rpop":
+            msg = self.identify_service_line.rpop(tracker_id)
+        if mode_pop == "lpop":
+            msg = self.identify_service_line.lpop(tracker_id)
         ret = None
         if msg is not None:
-            mode = msg.decode("utf-8")
-            content = self.identify_service_line.rpop(tracker_id)
+            mode = msg[0:1]
+            mode = mode.decode('utf-8')
+            content = msg[1:]
+            
             if mode == vision_config.ENCODE_MOD:
                 ret = manage_data.convert_bytes_to_embedding_vector(content)
             else:
                 predict_id = int(content)
+                print(mode, predict_id)
                 if predict_id != -1:
-                    pred_p = Person(id=predict_id)
-                    ret = self.database.getPersonById(pred_p.id)
+                    ret = self.database.getPersonById(predict_id)
             return (mode, ret)
         return (None, None)
 
+    def request_embed_faces(self, faces):
+        num_faces = len(faces)
+        embed_lst = []
+        id_req = str(uuid.uuid4())
+        for face in faces:
+            face = cv2.resize(face, (160, 160))
+            self.request_identify_service(face, id_req, vision_config.ENCODE_MOD)
+        receive = 0
+        while receive < num_faces:
+            mode, ret = self.get_response_identify_service(id_req)
+            if mode == vision_config.ENCODE_MOD:
+                embed_lst.append(ret)
+                receive += 1
+            time.sleep(0.1)
+        return embed_lst
     def get_frame_from_queue(self):
         frame = self.frame_queue.get(timeout = 1)
         return frame
+
+    @staticmethod
+    def face_in_training_area(frame, bbox_faces, training_area):
+        x, y, b_w, b_h = training_area
+        ans_bbox_faces = []
+        ans_img_faces = []
+        for idx, bbox in enumerate(bbox_faces):
+            x_, y_, w_, h_ = bbox
+            if x_ >= x and y_ >= y and x + w_ <= b_w and y + h_ <= b_h:
+                ans_bbox_faces.append((x_, y_, w_, h_))
+                im = frame[max(y_,0):y_+h_, max(x_,0):x_+w_]
+                ans_img_faces.append(im)
+        return (ans_bbox_faces, ans_img_faces)   

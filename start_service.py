@@ -1,7 +1,3 @@
-import client
-import service_detect_worker
-import service_identify
-import service_master
 import argparse
 
 parser = argparse.ArgumentParser(description="")
@@ -16,14 +12,18 @@ parser.set_defaults(client=False)
 
 def main(args):
     if args.master:
+        import service_master
         service_master.FaceDetectionService()
     if args.detect:
+        import service_detect_worker
         worker = service_detect_worker.FaceDetectionWorker()
         worker.register_work_service()
         worker.run_service()
     if args.iden:
+        import service_identify
         service_identify.FaceIdentifyService().run()
     if args.client:
+        import client
         client.start()
 if __name__ == '__main__':
     main(parser.parse_args())

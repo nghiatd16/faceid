@@ -42,7 +42,7 @@ SCREEN_SIZE = {
     'width' : 1280,
     'height' : 720
 }
-TRAINING_AREA = (384, 0, 640, 480)
+TRAINING_AREA = (320-128, 0, 320+128, 480)
 PADDING = 5
 SHOW_LOG_PREDICTION = True
 SHOW_LOG_TRACKING = True
@@ -54,7 +54,7 @@ def set_screen_size(w, h):
     h = int(h)
     SCREEN_SIZE['width'] = w
     SCREEN_SIZE['height'] = h
-    TRAINING_AREA = (int(3*w/5) + PADDING, PADDING, w-2*PADDING, h-2*PADDING)
+    TRAINING_AREA = (int(w/2-w/5) + PADDING, PADDING, int(w/2+w/5)-2*PADDING, h-2*PADDING)
 
 def get_time():
     import datetime
@@ -81,6 +81,7 @@ BATCH = 1
 IDENTIFY_QUEUE = SERVICE_TOKEN + '-IDENTIFY'
 ENCODE_MOD = "1"
 IDEN_MOD = "0"
+FLAG_REFETCH_DB = "-REFETCH_DB"
 def set_service_token(token):
     global SERVICE_TOKEN, SERVICE_REGISTER_CLIENT , SERVICE_REGISTER_WORKER, IDENTIFY_QUEUE
     SERVICE_TOKEN = token

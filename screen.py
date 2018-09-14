@@ -65,7 +65,7 @@ def identify():
     time_take_photo = 2
     bbox_list_online = []
     img_list_online = []
-    infor_pack = None
+    info_pack = None
     database_changed = False
     timer = time.time()
     bbox_faces = None
@@ -83,13 +83,13 @@ def identify():
             continue
             pass
         if flag_training_online:
-            if infor_pack is None:
+            if info_pack is None:
                 name = input('Name: ')
                 age = int(input('Age: '))
                 gender = input('Gender: ')
                 idCode = input('Id Code: ')
                 idCam = 1
-                infor_pack = (name, age, gender, idCode, idCam)
+                info_pack = (name, age, gender, idCode, idCam)
             if time_take_photo > 0.2:
                 cv2.rectangle(frame, (train_area[0], train_area[1]) , \
                                 (train_area[2], train_area[3]), \
@@ -122,7 +122,7 @@ def identify():
                         logging.info('Time_take_photo out')
                         flag_take_photo = False
                         if len(bbox_list_online) == 0:
-                            infor_pack = None
+                            info_pack = None
                             bbox_list_online.clear()
                             img_list_online.clear()
                             flag_training_online = False
@@ -130,8 +130,8 @@ def identify():
                             time_take_photo = 2
             if flag_take_photo == False and len(bbox_list_online) > 0:
                 learning.online_learning(bbox_list_online, img_list_online, \
-                                                    infor_pack, vision_object, multi_tracker, database)
-                infor_pack = None
+                                                    info_pack, vision_object, multi_tracker, database)
+                info_pack = None
                 bbox_list_online.clear()
                 img_list_online.clear()
                 flag_training_online = False

@@ -12,7 +12,8 @@ STATUS = STATUS_INACTIVE
 STATUS_CONFIRM = 3
 result = None
 
-db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
+# db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
+db = None
 def response_idCode_OK(idCode):
     person = db.getPersonByIdCode(idCode)
     if person is None:
@@ -22,7 +23,7 @@ def response_idCode_OK(idCode):
     # STATUS = STATUS_DONE
 
 def response_learning_OK(msg, person):
-    global STATUS
+    global STATUS, result
     logging.info("{} | person [id: {} - name: {} - idCode: {} - age: {} - gender: {}]".format(msg, \
                                                                     person.id, person.name, person.idcode, person.age, person.gender))
     result = person
@@ -168,8 +169,9 @@ def get_information(idCode):
     # root.destroy()
 
 
-def get_idCode():
-    global STATUS, label
+def get_idCode(database):
+    global STATUS, label, db
+    db = database
     STATUS = STATUS_INPROGRESS
     label = None
     root = Tk()

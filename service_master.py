@@ -48,15 +48,12 @@ class FaceDetectionService():
 
         logging.info('Start register service worker...')
         Thread(target=self.register_service_worker).start()
-        # _thread.start_new_thread(self.register_service_worker, ())
 
         logging.info('Start register service client...')
         Thread(target=self.register_service_client).start()
-        # _thread.start_new_thread(self.register_service_client, ())
 
         logging.info('Start guard timeout service...')
         Thread(target=self.guard_timeout_channel).start()
-        # _thread.start_new_thread(self.guard_timeout_channel, ())
 
     def register_service_client(self):
         try:

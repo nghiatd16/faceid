@@ -33,6 +33,7 @@ class Vision:
         if mode != 'only_identify':
             self.__pnet, self.__rnet, self.__onet = self.load_detect_face_model(device= vision_config.DETECT_DEVICE)
         if mode != 'only_detect':
+            self.__database = database
             self.__person, self.__feature, self.__label = database.extract_features_labels()
             if len(self.__feature) > 0:
                 self.__database_empty = False
@@ -41,11 +42,13 @@ class Vision:
     def get_working_mode(self):
         return self.mode
     
-    def update_new_database(self, database):
+    def update_new_database(self):
         if self.mode == 'only_detect':
             raise Exception("vision_object is on mode only_detect, doesn't support update database")
-        self.__person, self.__feature, self.__label = database.extract_features_labels()
+        self.__person, self.__feature, self.__label = self.__database.extract_features_labels()
         self.__database_empty = False
+        for l in self.__label:
+            print(l)
         self.__classifier.fit(self.__feature, self.__label)
 
     @staticmethod

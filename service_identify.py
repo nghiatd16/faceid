@@ -4,6 +4,8 @@ import cv2
 import vision_config
 import manage_data
 import numpy as np
+import time
+import threading
 from Vision import Vision
 from interact_database_v2 import Database
 from object_DL import Camera, Person, Image, Location
@@ -23,7 +25,15 @@ class FaceIdentifyService:
         except:
             raise ConnectionError('Cannot connect to database')
         self.vision_object = Vision(mode='only_identify', database=database)
-
+        threading.Thread(target=self.refetch_db).start()
+    def refetch_db(self):
+        self.rd.set(vision_config.FLAG_REFETCH_DB, b"0")
+        while True:
+            flag_value = self.rd.get(vision_config.FLAG_REFETCH_DB)
+            if flag_value is not None and flag_value == b"1":
+                self.rd.set(vision_config.FLAG_REFETCH_DB, b"0")
+                self.vision_object.update_new_database()
+            time.sleep(0.5)
     def run(self):
         logging.info('Service identify is running ...')
         while True:
@@ -37,14 +47,12 @@ class FaceIdentifyService:
                 len_ID = int(msg[0])
                 ID = msg[1:1+len_ID].decode('utf-8')
                 mode = msg[len_ID+1:len_ID+2].decode('utf-8')
-                # print(mode, type(mode))
                 face = np.frombuffer(msg[2+len_ID:], dtype=np.uint8)
                 face = cv2.imdecode(face, cv2.IMREAD_COLOR)
-                # print(face.shape)
                 if face.shape == (160, 160, 3):
-                    # face = np.reshape(face, (160, 160, 3))
                     IDs.append(ID)
                     modes.append(mode)
+                    # print(mode)
                     faces.append(face)
                 if len(faces) == vision_config.BATCH:
                     break
@@ -52,12 +60,18 @@ class FaceIdentifyService:
                 embedding_list, predictions = self.vision_object.identify_person_by_img(faces)
                 for i in range(len(IDs)):
                     if modes[i] == vision_config.IDEN_MOD:
+                        msg = ""
                         if predictions[i] is not None:
-                            self.rd.lpush(IDs[i], modes[i], predictions[i].id)
+                            msg = modes[i].encode("utf-8") + str(predictions[i].id).encode("utf-8")
+                            # print(predictions[i].id)
+                            self.rd.lpush(IDs[i], msg)
                         else:
-                            self.rd.lpush(IDs[i], modes[i], -1)
+                            msg = modes[i].encode("utf-8") + b"-1"
+                            self.rd.lpush(IDs[i], msg)
                     else:
-                        self.rd.lpush(IDs[i], modes[i], manage_data.convert_embedding_vector_to_bytes(embedding_list[i]))
+                        content = manage_data.convert_embedding_vector_to_bytes(embedding_list[i])
+                        msg = modes[i].encode("utf-8") + content
+                        self.rd.lpush(IDs[i], msg)
 # if __name__ == '__main__':
 #     fis = FaceIdentifyService()
 #     fis.run()

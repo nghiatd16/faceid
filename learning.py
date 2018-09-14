@@ -72,10 +72,10 @@ def add_data(img_faces):
         new_img_faces.append(im)
     return new_img_faces
 
-def online_learning(bbox_faces, img_faces, infor_pack, vision_object, multiTracker, database):
+def online_learning(bbox_faces, img_faces, info_pack, vision_object, multiTracker, database):
     if len(img_faces) == 0:
         return
-    name, age, gender, idCode, idCam = infor_pack
+    name, age, gender, idCode, idCam = info_pack
     manage_data.save_img(img_faces, name)
     # new_thumb = cv2.resize(img_faces[0], (50,50))
     
@@ -92,27 +92,36 @@ def online_learning(bbox_faces, img_faces, infor_pack, vision_object, multiTrack
     new_person = database.insertPerson(new_person)
     database.refetch_table('person')
     # person = database.getPer(new_person)[0]
-    time = vision_config.get_time()
+    time_cap = vision_config.get_time()
     cam = Camera(id = idCam)
-    new_image = Image(None, new_person, cam, time, b64Img, b64Face, embed_vector, False)
+    new_image = Image(None, new_person, cam, time_cap, b64Img, b64Face, embed_vector, False)
     database.insertImage(new_image)
-    # database.refetch_table('image')
-    # feature_db, thumb_db = {}, {}
-    # if database is not None:
-    #     feature_db, thumb_db = database
-    # thumb_db[name] = new_thumb
-    # if name in feature_db:
-    #     logging.info('{} has been already known. Transfer learning!'.format(name))
-    #     old_feature = feature_db[name]
-    #     logging.info(old_feature.shape)
-    #     logging.info(embedding_list.shape)
-    #     old_feature = np.concatenate((old_feature, embedding_list))
-    #     new_feature = np.mean(old_feature, axis=0)
-    #     feature_db[name] = np.array([new_feature])
-    # else:
-    #     feature_db[name] = embedding_list
-        
-    # database = (feature_db, thumb_db)
-    vision_object.update_new_database(database)
+    vision_object.update_new_database()
     multiTracker.remove_tracker(bbox_faces)
-    # return database
+
+def online_learning_service(bbox_faces, img_faces, client, info_pack, multiTracker, database):
+    if len(img_faces) == 0:
+        return
+    name, age, gender, idCode, idCam, embedding_list = info_pack
+    manage_data.save_img(img_faces, name)
+    # new_thumb = cv2.resize(img_faces[0], (50,50))
+    
+    img_faces = add_data(img_faces)
+    # embedding_list = vision_object.encode_embeddings(img_faces)
+    embedding_list = np.mean(embedding_list, axis=0)
+    embed_vector = np.array(embedding_list)
+    embedding_list = np.array([embedding_list])
+    embed_vector = manage_data.convert_embedding_vector_to_bytes(embed_vector)
+    b64Face = manage_data.convert_image_to_b64(img_faces[0])
+    b64Img = manage_data.convert_image_to_b64(img_faces[1])
+    
+    new_person = Person(None, name, age, gender, idCode, embed_vector, b64Face,  b64Img)
+    new_person = database.insertPerson(new_person)
+    time_cap = vision_config.get_time()
+    cam = Camera(id = idCam)
+    new_image = Image(None, new_person, cam, time_cap, b64Img, b64Face, embed_vector, True)
+    database.insertImage(new_image)
+    client.send_refetch_db_signal()
+    time.sleep(0.5)
+    # vision_object.update_new_database(database)
+    multiTracker.remove_tracker(bbox_faces)
