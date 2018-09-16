@@ -13,8 +13,8 @@ STATUS_CONFIRM = 3
 result = None
 msg_result = None
 
-# db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
-db = None
+db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
+# db = None
 def response_idCode_OK(idCode):
     person = db.getPersonByIdCode(idCode)
     if person is None:
@@ -25,8 +25,7 @@ def response_idCode_OK(idCode):
 
 def response_learning_OK(msg, person):
     global STATUS, result, msg_result
-    logging.info("{} | person [id: {} - name: {} - idCode: {} - age: {} - gender: {}]".format(msg, \
-                                                                    person.id, person.name, person.idcode, person.age, person.gender))
+    logging.info("{} | person {}".format(msg, person))
     result = person
     msg_result = msg
     STATUS = STATUS_DONE
@@ -117,7 +116,7 @@ def get_information(idCode):
     root.title("New Person")
     # root.geometry("500x50+100+100")
     row = Frame(root)
-    idCode_lb = Label(row, text="ID Code: {}".format(idCode), width=30, font=(16), anchor='w')
+    idCode_lb = Label(row, text="ID Code: {}".format(idCode), width=min(max(10 + len(str(idCode)), 25), 50), font=(16), anchor='w')
     # e1.grid(row=0, column = 1)
     
     idCode_lb.pack(side=TOP)
@@ -127,7 +126,8 @@ def get_information(idCode):
 
     name_txt = Entry(row, width=18, font=16)
     name_txt.pack(side=TOP, expand=YES, fill=X)
-    
+    name_txt.focus_set()
+
     age_lb = Label(row, text="Age", width=12, font=(16), anchor="w")
     age_lb.pack(side = TOP)
 
@@ -140,14 +140,22 @@ def get_information(idCode):
     gender_txt = Entry(row, width=18, font=16)
     gender_txt.pack(side=TOP, expand=YES, fill=X)
 
+    
     row.pack(side=TOP, fill=X, padx=5, pady=5)
     check = 0
 
     def call_ok(event=None):
         if STATUS == STATUS_CONFIRM:
             return
-        if len(name_txt.get()) == 0 or len(age_txt.get()) == 0 or len(gender_txt.get()) == 0:
-            get_information(idCode)
+        if len(name_txt.get()) == 0:
+            name_txt.focus_set()
+            return
+        if len(age_txt.get()) == 0:
+            age_txt.focus_set()
+            return
+        if len(gender_txt.get()) == 0:
+            gender_txt.focus_set()
+            return
         new_person = Person(name=name_txt.get(), age= int(age_txt.get()), gender=gender_txt.get(), idcode=idCode)
         # root.quit()
         show_information(vision_config.NEW_LEARNING_MSG, new_person)
@@ -213,5 +221,5 @@ def get_idCode(database):
     root.mainloop()
     # root.destroy()
 if __name__ =="__main__":
-    get_idCode()
+    get_idCode(db)
 # layout_text()
