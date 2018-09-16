@@ -56,11 +56,6 @@ def set_screen_size(w, h):
     SCREEN_SIZE['height'] = h
     TRAINING_AREA = (int(w/2-w/5) + PADDING, PADDING, int(w/2+w/5)-2*PADDING, h-2*PADDING)
 
-def get_time():
-    import datetime
-    now = datetime.datetime.now()
-    return now.strftime("%Y-%m-%d %H:%M:%S")
-
 # Service config
 REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379

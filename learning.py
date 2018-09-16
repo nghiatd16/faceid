@@ -12,7 +12,73 @@ import manage_data
 
 
 # def offline_learning(img_dir):
+def offline_learning(dataset_path):
+    def extract_info_text(path):
+        info = open(path, "r")
+        name, age, gender, idcode = info.readlines()
+        name = name[:-1]
+        age = int(age[:-1])
+        gender = gender[:-1]
+        info.close()
+        return (name, age, gender, idcode)
+    database = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
+    vision_object = Vision(database, mode="only_identify")
+    cwd = os.getcwd()
+    os.chdir(dataset_path)
     
+    st = time.time()
+    for folder in os.listdir():
+        logging.info("Processing `{}`".format(os.path.abspath(folder)))
+        try:
+            person_folder = os.path.abspath(folder)
+            list_img = []
+            for file in os.listdir(person_folder):
+                file = os.path.join(person_folder, os.path.basename(file))
+                if file.endswith(".jpg") or file.endswith(".png") and os.path.basename(file) != "__avatar__.jpg":
+                    img = cv2.imread(file)
+                    img = cv2.resize(img, (Vision.SIZE_OF_INPUT_IMAGE, Vision.SIZE_OF_INPUT_IMAGE))
+                    list_img.append(img)
+            embedding_list = vision_object.encode_embeddings(list_img)
+            embedding_vector = np.mean(embedding_list, axis=0)
+            embedding_vector = manage_data.convert_embedding_vector_to_bytes(embedding_vector)
+            name, age, gender, idcode = extract_info_text(os.path.join(folder, "__info__.txt"))
+            check_person = database.getPersonByIdCode(idcode)
+            if check_person is not None:
+                logging.info("person {} is known. Proceed Transfer Learning!".format(check_person))
+                embedding_known = manage_data.convert_bytes_to_embedding_vector(check_person.embedding)
+                embedding_list = [embedding_known]
+                embedding_list.append(embedding_vector)
+                embedding_list = np.array(embedding_list)
+                embedding_vector = np.mean(embedding_list, axis=0)
+                embedding_vector = manage_data.convert_embedding_vector_to_bytes(embedding_vector)
+                database.updatePerson(Person(embedding=embedding_vector), learning_person)
+                continue
+            avatar_path = os.path.join(folder, "__avatar__.jpg")
+            avatar = cv2.imread(avatar_path)
+            avatar = cv2.resize(avatar, (200, 200))
+            b64_img = manage_data.convert_image_to_b64(avatar)
+            face_path = os.path.join(folder, "__face__.jpg")
+            face = cv2.imread(face_path)
+            face = cv2.resize(face, (Vision.SIZE_OF_INPUT_IMAGE, Vision.SIZE_OF_INPUT_IMAGE))
+            b64_face = manage_data.convert_image_to_b64(face)
+            person = Person(name= name, age= age, gender= gender, idcode= idcode, embedding= embedding_vector, b64face= b64_face, b64image= b64_img)
+            logging.info("New Learning a person {}".format(person))
+            database.insertPerson(person)
+        except Exception as e:
+            logging.error(e)
+            pass
+    delta = time.time() - st
+    elapsed = None
+    if delta < 60:
+        elapsed = time.strftime("%S seconds", time.gmtime(delta))
+    elif delta < 3600:
+        elapsed = time.strftime("%M minutes : %S seconds", time.gmtime(delta))
+    else:
+        elapsed = time.strftime("%H hours : %M minutes : %S seconds", time.gmtime(delta))
+    logging.info("Training complete in: {}".format(elapsed))
+    os.chdir(cwd)
+        
+            
 
 def add_data(img_faces):
     new_img_faces = []
@@ -75,7 +141,6 @@ def online_learning_service(bbox_faces, img_faces, client, info_pack, multiTrack
         embedding_list.append(embed_vector)
         embedding_list = np.array(embedding_list)
         embed_vector = np.mean(embedding_list, axis=0)
-        print(embed_vector.shape)
         embed_vector = manage_data.convert_embedding_vector_to_bytes(embed_vector)
         database.updatePerson(Person(embedding=embed_vector), learning_person)
         learning_person = database.getPersonByIdCode(idCode)
@@ -87,3 +152,7 @@ def online_learning_service(bbox_faces, img_faces, client, info_pack, multiTrack
     time.sleep(0.5)
     # vision_object.update_new_database(database)
     multiTracker.remove_tracker(bbox_faces)
+
+if __name__ == "__main__":
+    dataset_path = input("Dataset path: ")
+    offline_learning(os.path.abspath(dataset_path))

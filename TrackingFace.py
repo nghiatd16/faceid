@@ -68,7 +68,6 @@ class MultiTracker:
                 if cur_time - self.__multiTracker[idx-num_del].last_appearance >= 0.4:
                     del self.__multiTracker[idx-num_del]
                     if vision_config.SHOW_LOG_TRACKING:
-                        now = vision_config.get_time()
                         logging.warning('An object has been stopped tracking!')
                         logging.info('Number of tracker remainings: {}'.format(len(self.__multiTracker)))
                     num_del += 1
