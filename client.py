@@ -9,6 +9,9 @@ import interface
 from interact_database_v2 import Database
 from object_DL import Camera
 from TrackingFace import MultiTracker
+from face_graphics import GraphicPyGame
+
+SHOW_GRAPHICS = True
 FLAG_TRAINING = False
 FLAG_TAKE_PHOTO = False
 info_pack = ()
@@ -18,11 +21,10 @@ bbox_list_online = []
 img_list_online = []
 timer = time.time()
 train_timer = time.time()
-def start():
-    global info_pack, FLAG_TAKE_PHOTO, FLAG_TRAINING, timer, train_timer, time_take_photo, tim_elapsed, bbox_list_online, img_list_online
-    database = Database(vision_config.DB_HOST,vision_config.DB_USER,vision_config.DB_PASSWD, vision_config.DB_NAME)
+
+def sub_task(database, client, graphics=None):
+    global info_pack, SHOW_GRAPHICS, FLAG_TAKE_PHOTO, FLAG_TRAINING, timer, train_timer, time_take_photo, tim_elapsed, bbox_list_online, img_list_online
     cam = database.getCameraById(1)
-    client = service_client_demo.ClientService(database, None)
     client.subscribe_server()
     multi_tracker = MultiTracker()
     client.record()
@@ -118,6 +120,11 @@ def start():
                     client.request_identify_service(face, tracker.id, mode = vision_config.IDEN_MOD)
                     tracker.last_time_tried = time.time()
                     tracker.tried += 1
+        if SHOW_GRAPHICS:
+            graphics.put_update(frame, multi_tracker)
+            if not graphics.running:
+                client.stop_service()
+                break
         multi_tracker.show_info(frame)
         cv2.putText(frame, 'FPS ' + str(fps), \
                     vision_config.FPS_POS, cv2.FONT_HERSHEY_SIMPLEX, \
@@ -135,3 +142,13 @@ def start():
         if key == 32 and FLAG_TRAINING:
             FLAG_TAKE_PHOTO = True
     cv2.destroyAllWindows()
+
+def start():
+    database = Database(vision_config.DB_HOST,vision_config.DB_USER,vision_config.DB_PASSWD, vision_config.DB_NAME)
+    client = service_client_demo.ClientService(database, None)
+    if not SHOW_GRAPHICS:
+        sub_task(database, client)
+    else:
+        graphics = GraphicPyGame(vision_config.SCREEN_SIZE['width'], vision_config.SCREEN_SIZE['height'])
+        threading.Thread(target=sub_task, args=(database, client, graphics)).start()
+        graphics.run()

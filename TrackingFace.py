@@ -140,8 +140,7 @@ class MultiTracker:
                 identified_tracker.append(self.__multiTracker[find])
         return (unidentified_tracker, identified_tracker)
 
-    def show_info(self, frame, database = None):
-        
+    def show_info(self, frame, database = None):  
         pos_y = vision_config.DIS_THUMB_Y
         pos_x = vision_config.DIS_THUMB_X
         for tracker in self.__multiTracker:
