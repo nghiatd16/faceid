@@ -13,8 +13,8 @@ STATUS_CONFIRM = 3
 result = None
 msg_result = None
 
-db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
-# db = None
+# db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
+db = None
 def response_idCode_OK(idCode):
     person = db.getPersonByIdCode(idCode)
     if person is None:
