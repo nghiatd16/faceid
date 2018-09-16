@@ -87,13 +87,13 @@ class MultiTracker:
                 if tracker.person is not None and tracker.image is not None:
                     b64_img = manage_data.convert_image_to_b64(tracker.image)
                     new_image = Image(None, tracker.person, Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
-                    # database.insertImage(new_image)
+                    database.insertImage(new_image)
                     tracker.image = None
                 elif tracker.image is not None:
                     b64_img = manage_data.convert_image_to_b64(tracker.image)
                     tracker.image = None
                     new_image = Image(None, Person(id=-1), Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
-                    # database.insertImage(new_image)
+                    database.insertImage(new_image)
         control_tracking_object(self)
 
     def update_identification(self, tracker_lst, prediction, img_list=None):

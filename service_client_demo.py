@@ -147,7 +147,6 @@ class ClientService:
                 ret = manage_data.convert_bytes_to_embedding_vector(content)
             else:
                 predict_id = int(content)
-                print(mode, predict_id)
                 if predict_id != -1:
                     ret = self.database.getPersonById(predict_id)
             return (mode, ret)

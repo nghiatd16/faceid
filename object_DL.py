@@ -26,6 +26,9 @@ class Camera:
         if self.location is not None and isinstance(self.location, Location):
             self.idlocation = self.location.id
         return (self.id, self.cameraname, self.httpurl, self.rstpurl, self.idlocation)
+    
+    def __str__(self):
+        return "[id: {} - cameraName: {} - httpurl: {} - rstpurl: {} - location: {}]".format(self.id, self.httpurl, self.rstpurl, self.location)
 
 class Image:
     def __init__(self, id=None, person=None, camera=None, time=None, b64image=None, b64face=None, embedding=None, istrained=None):
@@ -62,6 +65,9 @@ class Image:
             self.idcamera = self.camera.id
         return (self.id, self.idperson, self.idcamera, self.time, self.b64image, self.b64face, self.embedding, self.istrained)
 
+    def __str__(self):
+        return "[id: {} - idPerson: {} - idCamera: {} - timeCaptured: {} - isTrained: {}]".format(self.id, self.idperson, self.idcamera, self.time, self.istrained)
+
 class Location:
     def __init__(self, id=None, longtitude=None, latitude=None, location=None):
         self.id = id
@@ -87,6 +93,8 @@ class Location:
     def get_value(self):
         return (self.id, self.longtitude, self.latitude, self.location)
 
+    def __str__(self):
+        return "[id: {} - longtitude: {} - latitude: {} - location: {}]".format(self.id, self.longtitude, self.latitude, self.location)
 class Person:
     def __init__(self, id=None, name=None, age=None, gender=None, idcode=None, embedding=None, b64face=None, b64image=None):
         self.id = id
@@ -116,6 +124,8 @@ class Person:
     def get_value(self):
         return (self.id, self.name, self.age, self.gender, self.idcode, self.embedding, self.b64face, self.b64image)
 
+    def __str__(self):
+        return "[id: {} - name: {} - age: {} - gender: {} - idCode: {}]".format(self.id, self.name, self.age, self.gender, self.idcode)
 if __name__ == "__main__":
     l = Location(id=3, location="abc", longtitude="132", latitude="321")
     c = Camera(name="abc", httpurl="asdasd", location=l)

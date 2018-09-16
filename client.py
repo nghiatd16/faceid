@@ -47,7 +47,7 @@ def start():
             gender = person.gender
             idCode = person.idcode
             idCam = 1
-            info_pack = (name, age, gender, idCode, idCam)
+            info_pack = (interface.msg_result, name, age, gender, idCode, idCam)
             interface.reset()
         if FLAG_TRAINING:
             if time_take_photo > 0.2:
@@ -92,8 +92,8 @@ def start():
                 # learning.online_learning(bbox_list_online, img_list_online, \
                 #                                     info_pack, vision_object, multi_tracker, database)
                 embed_list = client.request_embed_faces(img_list_online)
-                name, age, gender, idCode, idCam = info_pack
-                pass_pack = (name, age, gender, idCode, idCam, embed_list)
+                msg, name, age, gender, idCode, idCam = info_pack
+                pass_pack = (msg, name, age, gender, idCode, idCam, embed_list)
                 learning.online_learning_service(bbox_list_online, img_list_online, client,\
                                                 pass_pack, multi_tracker, database)
                 info_pack = None

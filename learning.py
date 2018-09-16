@@ -6,60 +6,13 @@ import cv2
 import os
 import time
 from object_DL import Person, Image, Camera, Location
+from interact_database_v2 import Database
 import logging
 import manage_data
 
 
-def offline_learning(img_dir):
-    feature_db, thumb_db = {}, {}    
-    try:
-        database = manage_data.read_database_from_disk(vision_config.DATABASE_DIR, vision_config.DATABASE_NAME_LOAD)
-        feature_db, thumb_db = database
-    except:
-        database = None
-        pass
-    images, thumbs = manage_data.list_img_on_disk(img_dir)
-    if len(images) == 0:
-        raise Warning('No image found! This is not an error, make sure that you give system a correct directory! \
-                        All experiences learned are untouched!')
-        return
-    vision_object = Vision(mode='only_identify')
-    img_list = {}
-    now = vision_config.get_time()
-    logging.info('Preprocessing...')
-    for name in thumbs:
-        im = cv2.imread(thumbs[name])
-        im = cv2.resize(im, (50, 50))
-        thumb_db[name] = im
-    for person in images:
-        logging.info(person)
-        for i in range(len(images[person])):
-            im = cv2.imread(images[person][i])
-            im = cv2.resize(im, (Vision.SIZE_OF_INPUT_IMAGE, Vision.SIZE_OF_INPUT_IMAGE))
-            if person not in img_list:
-                img_list[person] = [im]
-            else:
-                img_list[person].append(im)
-    now = vision_config.get_time()
-    logging.info('Preprocessing done!')
-    if len(img_list) > 0:
-        st = time.time()
-        logging.info('System is being trained...')
-        for person in img_list:
-            embedding_list = vision_object.encode_embeddings(img_list[person])
-            embedding_list = np.mean(embedding_list, axis=0)
-            embedding_list = np.array([embedding_list])
-            if person in feature_db:
-                old_feature = feature_db[person]
-                old_feature = np.concatenate((old_feature, embedding_list))
-                new_feature = np.mean(old_feature, axis=0)
-                feature_db[person] = np.array([new_feature])
-            else:
-                feature_db[person] = embedding_list
-        database = (feature_db, thumb_db)
-        logging.info('Training completed in {} seconds'.format(time.time() - st))
-        manage_data.save_database_into_disk(database, vision_config.DATABASE_DIR, vision_config.DATABASE_NAME_SAVE)
-        logging.info('Training completed!')
+# def offline_learning(img_dir):
+    
 
 def add_data(img_faces):
     new_img_faces = []
@@ -102,24 +55,33 @@ def online_learning(bbox_faces, img_faces, info_pack, vision_object, multiTracke
 def online_learning_service(bbox_faces, img_faces, client, info_pack, multiTracker, database):
     if len(img_faces) == 0:
         return
-    name, age, gender, idCode, idCam, embedding_list = info_pack
-    manage_data.save_img(img_faces, name)
+    msg, name, age, gender, idCode, idCam, embedding_list = info_pack
+    # manage_data.save_img(img_faces, name)
     # new_thumb = cv2.resize(img_faces[0], (50,50))
     
-    img_faces = add_data(img_faces)
-    # embedding_list = vision_object.encode_embeddings(img_faces)
-    embedding_list = np.mean(embedding_list, axis=0)
-    embed_vector = np.array(embedding_list)
-    embedding_list = np.array([embedding_list])
-    embed_vector = manage_data.convert_embedding_vector_to_bytes(embed_vector)
+    embed_vector = np.mean(embedding_list, axis=0)
+    embed_vector = np.array(embed_vector)
+    learning_person = None
     b64Face = manage_data.convert_image_to_b64(img_faces[0])
     b64Img = manage_data.convert_image_to_b64(img_faces[1])
-    
-    new_person = Person(None, name, age, gender, idCode, embed_vector, b64Face,  b64Img)
-    new_person = database.insertPerson(new_person)
+    if msg == vision_config.NEW_LEARNING_MSG:
+        embed_vector = manage_data.convert_embedding_vector_to_bytes(embed_vector)
+        learning_person = Person(None, name, age, gender, idCode, embed_vector, b64Face,  b64Img)
+        learning_person = database.insertPerson(learning_person)
+    elif msg == vision_config.TRANSFER_LEARNING_MSG:
+        learning_person = database.getPersonByIdCode(idCode)
+        embedding_known = manage_data.convert_bytes_to_embedding_vector(learning_person.embedding)
+        embedding_list = [embedding_known]
+        embedding_list.append(embed_vector)
+        embedding_list = np.array(embedding_list)
+        embed_vector = np.mean(embedding_list, axis=0)
+        print(embed_vector.shape)
+        embed_vector = manage_data.convert_embedding_vector_to_bytes(embed_vector)
+        database.updatePerson(Person(embedding=embed_vector), learning_person)
+        learning_person = database.getPersonByIdCode(idCode)
     time_cap = vision_config.get_time()
     cam = Camera(id = idCam)
-    new_image = Image(None, new_person, cam, time_cap, b64Img, b64Face, embed_vector, True)
+    new_image = Image(None, learning_person, cam, time_cap, b64Img, b64Face, embed_vector, True)
     database.insertImage(new_image)
     client.send_refetch_db_signal()
     time.sleep(0.5)

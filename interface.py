@@ -11,6 +11,7 @@ STATUS_DONE = 2
 STATUS = STATUS_INACTIVE
 STATUS_CONFIRM = 3
 result = None
+msg_result = None
 
 # db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
 db = None
@@ -19,14 +20,15 @@ def response_idCode_OK(idCode):
     if person is None:
         get_information(idCode)
     else:
-        show_information("Transfer Learning", person)
+        show_information(vision_config.TRANSFER_LEARNING_MSG, person)
     # STATUS = STATUS_DONE
 
 def response_learning_OK(msg, person):
-    global STATUS, result
+    global STATUS, result, msg_result
     logging.info("{} | person [id: {} - name: {} - idCode: {} - age: {} - gender: {}]".format(msg, \
                                                                     person.id, person.name, person.idcode, person.age, person.gender))
     result = person
+    msg_result = msg
     STATUS = STATUS_DONE
 
 def response_cancel():
@@ -148,7 +150,7 @@ def get_information(idCode):
             get_information(idCode)
         new_person = Person(name=name_txt.get(), age= int(age_txt.get()), gender=gender_txt.get(), idcode=idCode)
         # root.quit()
-        show_information("Learn New Person", new_person)
+        show_information(vision_config.NEW_LEARNING_MSG, new_person)
         
         if STATUS == STATUS_DONE:
             root.destroy()
