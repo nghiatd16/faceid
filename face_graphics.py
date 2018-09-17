@@ -9,6 +9,11 @@ from object_DL import Person
 from TrackingFace import MultiTracker
 import vision_config
 import logging
+import base64
+import sys
+import os
+from io import BytesIO
+from PIL import Image
 
 class Thumbnail:
     PAD = 10
@@ -18,9 +23,14 @@ class Thumbnail:
     SPEED_X = 20
     SPEED_Y = 10
     SPEED_ALPHA = 10
+    THICK = 1
 
     def __init__(self, person, idx):
         self.person = person
+        self.face = np.frombuffer(base64.decodestring(self.person.b64image.encode()), dtype=np.uint8)
+        self.face = cv2.imdecode(self.face, cv2.IMREAD_COLOR)
+        self.face = cv2.cvtColor(self.face, cv2.COLOR_BGR2RGB)
+
         self.last_time = time.time()
         self.x = 0 - Thumbnail.SIZE_X - int((Thumbnail.PAD + Thumbnail.SIZE_Y)*Thumbnail.SPEED_X/Thumbnail.SPEED_Y)
         self.target_x = Thumbnail.PAD
@@ -34,49 +44,96 @@ class Thumbnail:
         self.target_y = (Thumbnail.PAD + Thumbnail.SIZE_Y)*idx + Thumbnail.PAD
 
     def draw(self, screen):
+        player = pygame.image.frombuffer(self.face.tostring(), self.face.shape[1::-1], 'RGB',)
+        player = pygame.transform.scale(player, (self.SIZE_Y-2*self.THICK, self.SIZE_Y-2*self.THICK))
         s = pygame.Surface((self.SIZE_X,self.SIZE_Y))
         s.set_alpha(self.alpha)
-        s.fill(GraphicPyGame.COLOR_GREEN)
+        pygame.draw.rect(s, GraphicPyGame.COLOR_GREEN, (0, 0, self.SIZE_Y, self.SIZE_Y))
+        s.blit(player, (self.THICK, self.THICK))
         screen.blit(s, (self.x, self.y))
 
 class BBox:
     TEXT_FACTOR = 0.1
     MIN_TEXT = 15
+    MARGIN_POS = 0.05
+    MARGIN_SIZE = 0.05
+    SPEED_POS = 25
+    SPEED_SIZE = 50
 
-    def __init__(self, bbox, person, matching):
+    def __init__(self, id, bbox, person, matching):
+        self.id = id
         self.x, self.y, self.w, self.h = bbox
+        self.x -= int(self.w * self.MARGIN_POS)
+        self.y -= int(self.w * self.MARGIN_POS)
+        self.w += int(2 * self.w * self.MARGIN_POS)
+        self.h += int(2 * self.h * self.MARGIN_POS)
+        self.target_x, self.target_y, self.target_w, self.target_h = self.x, self.y, self.w, self.h
+        self.x = int(self.target_x + self.target_w/2)
+        self.y = int(self.target_y + self.target_h/2)
+        self.w = 1
+        self.h = 1
         self.thickness = max(1, int(min(self.w, self.h)/100))
         if self.thickness % 2 == 0:
             self.thickness += 1
         self.person = person
         self.matching = matching
     
-    def draw(self, screen):
+    def update_bbox(self, bbox, person, matching):
+        self.person = person
+        self.matching = matching
+        x, y, w, h = bbox
+        x -= int(w * self.MARGIN_POS)
+        y -= int(w * self.MARGIN_POS)
+        w += int(2 * w * self.MARGIN_POS)
+        h += int(2 * h * self.MARGIN_POS)
+        if abs(w - self.w) > self.w * self.MARGIN_SIZE:
+            self.target_w = w
+            self.target_h = h
+        if abs(x - self.x) > self.w * self.MARGIN_POS:
+            self.target_x = x
+        if abs(y - self.y) > self.w * self.MARGIN_POS:
+            self.target_y = y
+
+    def update(self):
+        if self.x < self.target_x:
+            self.x = min(self.x + self.SPEED_POS, self.target_x)
+        elif self.x > self.target_x:
+            self.x = max(self.x - self.SPEED_POS, self.target_x)
+        if self.y < self.target_y:
+            self.y = min(self.y + self.SPEED_POS, self.target_y)
+        elif self.y > self.target_y:
+            self.y = max(self.y - self.SPEED_POS, self.target_y)
+        if self.w < self.target_w:
+            self.w = min(self.w + self.SPEED_SIZE, self.target_w)
+        elif self.w > self.target_w:
+            self.w = max(self.w - self.SPEED_SIZE, self.target_w)
+        if self.h < self.target_h:
+            self.h = min(self.h + self.SPEED_SIZE, self.target_h)
+        elif self.h > self.target_h:
+            self.h = max(self.h - self.SPEED_SIZE, self.target_h)
+
+
+    def draw(self, screen, list_thumbnail):
         info = None
+        sf_bbox = None
         if self.person is None and self.matching:
             color = GraphicPyGame.COLOR_WHITE
+            sf_bbox = GraphicPyGame.BBOX_WHITE
         elif self.person is None and not self.matching:
             color = GraphicPyGame.COLOR_RED
+            sf_bbox = GraphicPyGame.BBOX_RED
             info = GraphicPyGame.FONT_VIETNAMESE.render('Unknown', False, GraphicPyGame.COLOR_RED)
         elif self.person is not None:
             color = GraphicPyGame.COLOR_GREEN
+            sf_bbox = GraphicPyGame.BBOX_GREEN
             info = GraphicPyGame.FONT_VIETNAMESE.render(self.person.name, False, GraphicPyGame.COLOR_WHITE)
-            
-        pygame.draw.lines(screen, color, True, [(self.x, self.y), (self.x+self.w, self.y), (self.x+self.w, self.y+self.h), (self.x, self.y+self.h)], self.thickness)
-        pygame.draw.lines(screen, color, False, [(self.x + int(self.w/2), self.y), (self.x + int(self.w/2), self.y + 6*self.thickness)], self.thickness)
-        pygame.draw.lines(screen, color, False, [(self.x + self.w, self.y + int(self.h/2)), (self.x + self.w - 6*self.thickness, self.y + int(self.h/2))], self.thickness)
-        pygame.draw.lines(screen, color, False, [(self.x + int(self.w/2), self.y + self.h), (self.x + int(self.w/2), self.y + self.h - 6*self.thickness)], self.thickness)
-        pygame.draw.lines(screen, color, False, [(self.x, self.y + int(self.h/2)), (self.x + 6*self.thickness, self.y + int(self.h/2))], self.thickness)
+            for tn in list_thumbnail:
+                if tn.person.id == self.person.id:
+                    pygame.draw.lines(screen, color, False, [(self.x - self.thickness, self.y-self.thickness), (tn.x + Thumbnail.SIZE_X, tn.y)])
+                    break
+        sf_bbox = pygame.transform.scale(sf_bbox, (self.w, self.h))
+        screen.blit(sf_bbox, (self.x, self.y))
 
-        pygame.draw.lines(screen, color, False, [(self.x, self.y + int(self.h/4)), (self.x, self.y - self.thickness)], 3*self.thickness)
-        pygame.draw.lines(screen, color, False, [(self.x - self.thickness, self.y), (self.x + int(self.w/4), self.y)], 3*self.thickness)
-        pygame.draw.lines(screen, color, False, [(self.x + int(self.w*3/4), self.y), (self.x + self.w + self.thickness, self.y)], 3*self.thickness)
-        pygame.draw.lines(screen, color, False, [(self.x + self.w, self.y - self.thickness), (self.x + self.w, self.y + int(self.h/4))], 3*self.thickness)
-        pygame.draw.lines(screen, color, False, [(self.x + self.w, self.y + int(self.h*3/4)), (self.x + self.w, self.y + self.h + self.thickness)], 3*self.thickness)
-        pygame.draw.lines(screen, color, False, [(self.x + self.w + self.thickness, self.y + self.h), (self.x + int(self.w*3/4), self.y + self.h)], 3*self.thickness)
-        pygame.draw.lines(screen, color, False, [(self.x + int(self.w/4), self.y + self.h), (self.x - self.thickness, self.y + self.h)], 3*self.thickness)
-        pygame.draw.lines(screen, color, False, [(self.x, self.y + self.h + self.thickness), (self.x, self.y + int(self.h*3/4))], 3*self.thickness)
-        
         if info is not None:
             # info = GraphicPyGame.FONT_JAPANESE.render(u'ダム・バ・クイーン', False, GraphicPyGame.COLOR_WHITE)
             info_w, info_h = info.get_size()
@@ -93,14 +150,18 @@ class GraphicPyGame:
     COLOR_RED = (190,40,40)
     FONT_VIETNAMESE = None
     FONT_JAPANESE = None
+    BBOX_GREEN = None
+    BBOX_RED = None
+    BBOX_WHITE = None
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, queue=None):
         self.frame = None
         self.running = True
         GraphicPyGame.WIDTH = width
         GraphicPyGame.HEIGHT = height
         self.list_thumbnail = []
         self.list_bbox = []
+        self.queue = queue
         
         pygame.init()
         self.mask = pygame.Surface((self.WIDTH, self.HEIGHT))
@@ -110,22 +171,42 @@ class GraphicPyGame:
             pygame.draw.line(self.mask, (255,255,255), (0,i), (self.WIDTH,i))
         GraphicPyGame.FONT_VIETNAMESE = pygame.font.Font('font/Montserrat-Medium.otf', 100)
         GraphicPyGame.FONT_JAPANESE = pygame.font.Font('font/NotoSansMonoCJKjp-Regular.otf', 100)
+        self.screen = pygame.display.set_mode((GraphicPyGame.WIDTH, GraphicPyGame.HEIGHT))
+        GraphicPyGame.BBOX_GREEN = self.create_bbox_template(GraphicPyGame.COLOR_GREEN)
+        GraphicPyGame.BBOX_RED = self.create_bbox_template(GraphicPyGame.COLOR_RED)
+        GraphicPyGame.BBOX_WHITE = self.create_bbox_template(GraphicPyGame.COLOR_WHITE)
     
     def set_frame(self, frame):
         self.frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     def put_update(self, frame, multi_tracker):
         self.frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        self.list_bbox = []
+        # self.list_bbox = []
+        tmp = []
         for tracker in multi_tracker.get_multitracker():
+            bbox = None
+            for item in self.list_bbox:
+                if item.id == tracker.id:
+                    bbox = item
+                    break
             if tracker.person is None and tracker.receive < vision_config.NUM_TRIED:
-                bbox = BBox(tracker.bounding_box, None, True)
+                if bbox is None:
+                    bbox = BBox(tracker.id, tracker.bounding_box, None, True)
+                else:
+                    bbox.update_bbox(tracker.bounding_box, None, True)
             elif tracker.person is None:
-                bbox = BBox(tracker.bounding_box, None, False)
+                if bbox is None:
+                    bbox = BBox(tracker.id, tracker.bounding_box, None, False)
+                else:
+                    bbox.update_bbox(tracker.bounding_box, None, False)
             else:
-                bbox = BBox(tracker.bounding_box, tracker.person, False)
+                if bbox is None:
+                    bbox = BBox(tracker.id, tracker.bounding_box, tracker.person, False)
+                else:
+                    bbox.update_bbox(tracker.bounding_box, tracker.person, False)
                 self.add_thumbnail(tracker.person)
-            self.list_bbox.append(bbox)
+            tmp.append(bbox)
+        self.list_bbox = tmp
 
     def add_thumbnail(self, person):
         for tn in self.list_thumbnail:
@@ -136,7 +217,6 @@ class GraphicPyGame:
         self.list_thumbnail.insert(0, tn)
         for i in range(1, len(self.list_thumbnail)):
             self.list_thumbnail[i].set_position(i)
-        print(len(self.list_thumbnail))
 
     def del_thumnnail(self):
         del self.list_thumbnail[randint(0, len(self.list_thumbnail)-1)]
@@ -158,12 +238,30 @@ class GraphicPyGame:
                 tn.alpha = min(tn.target_alpha, tn.alpha + Thumbnail.SPEED_ALPHA)
             elif tn.alpha > tn.target_alpha:
                 tn.alpha = max(tn.target_alpha, tn.alpha - Thumbnail.SPEED_ALPHA)
-
-            if tn.last_time + Thumbnail.LIFE_TIME < time.time():
+            if tn.last_time + Thumbnail.LIFE_TIME > time.time():
                 tmp.append(tn)
         self.list_thumbnail = tmp
         for i in range(len(self.list_thumbnail)):
             self.list_thumbnail[i].set_position(i)
+
+    def create_bbox_template(self, color):
+        x = 1601
+        xx = (x-1)/4
+        d = 12
+        m = (3*d-1)/2
+        sf_bbox = pygame.Surface((x, x)).convert_alpha()
+        sf_bbox.fill((0, 0, 0, 0))
+        pygame.draw.lines(sf_bbox, color, True, [(m,m), (x-m,m), (x-m,x-m), (m,x-m)], d)
+        pygame.draw.lines(sf_bbox, color, False, [((x-1)/2,m), ((x-1)/2,7*m)], d)
+        pygame.draw.lines(sf_bbox, color, False, [((x-1)/2,x-m), ((x-1)/2,x-7*m)], d)
+        pygame.draw.lines(sf_bbox, color, False, [(m,(x-1)/2), (7*m,(x-1)/2)], d)
+        pygame.draw.lines(sf_bbox, color, False, [(x-m,(x-1)/2), (x-7*m,(x-1)/2)], d)
+
+        pygame.draw.polygon(sf_bbox, color, [(0,0), (xx,0), (xx,3*d), (3*d,3*d), (3*d,xx), (0,xx)], 0)
+        pygame.draw.polygon(sf_bbox, color, [(x,0), (x,xx), (x-3*d,xx), (x-3*d,3*d), (x-xx,3*d), (x-xx,0)], 0)
+        pygame.draw.polygon(sf_bbox, color, [(x,x), (x-xx,x), (x-xx,x-3*d), (x-3*d,x-3*d), (x-3*d,x-xx), (x,x-xx)], 0)
+        pygame.draw.polygon(sf_bbox, color, [(0,x), (0,x-xx), (3*d,x-xx), (3*d,x-3*d), (xx,x-3*d), (xx,x)], 0)
+        return sf_bbox
 
     def draw(self):
         self.screen.fill(0)
@@ -172,32 +270,43 @@ class GraphicPyGame:
         for tn in self.list_thumbnail:
             tn.draw(self.screen)
         for bbox in self.list_bbox:
-            bbox.draw(self.screen)
-        self.screen.blit(self.mask, (0,0))
+            bbox.update()
+            bbox.draw(self.screen, self.list_thumbnail)
+        # self.screen.blit(self.mask, (0,0))
+
+    def convert_jpeg(self):
+        data = pygame.image.tostring(self.screen, 'RGB')
+        img = Image.frombytes('RGB', (GraphicPyGame.WIDTH, GraphicPyGame.HEIGHT), data)
+        zdata = BytesIO()
+        img.save(zdata, 'JPEG')
+        return zdata.getvalue()
 
     def run(self):
         clock = pygame.time.Clock()
         # self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT), pygame.FULLSCREEN )
-        self.screen = pygame.display.set_mode((GraphicPyGame.WIDTH, GraphicPyGame.HEIGHT))
         id = 0
         while self.running:
-            try:
-                start_time = time.time()
-                if self.frame is not None:
-                    self.update_thumbnail()
-                    self.draw()
-                    pygame.display.flip()
-
-                for event in pygame.event.get():
-                    if event.type==pygame.QUIT:
-                        self.running = False
-                        pygame.quit() 
-                        exit(0)
-                clock.tick(self.FPS)
-            except Exception as e:
-                logging.error(e)
-                self.running = False
-                break
+            # try:
+            start_time = time.time()
+            if self.frame is not None:
+                self.update_thumbnail()
+                self.draw()
+                pygame.display.flip()
+            if self.queue is not None:
+                self.queue.put(self.convert_jpeg())
+            for event in pygame.event.get():
+                if event.type==pygame.QUIT:
+                    self.running = False
+                    pygame.quit() 
+                    exit(0)
+            print(time.time() - start_time)
+            clock.tick(self.FPS)
+            # except Exception as e:
+            #     exc_type, exc_obj, exc_tb = sys.exc_info()
+            #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            #     print(exc_type, fname, exc_tb.tb_lineno)
+            #     self.running = False
+            #     break
 
 def run_video(graphic):
     cap = cv2.VideoCapture(0)

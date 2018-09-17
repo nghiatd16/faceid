@@ -10,8 +10,16 @@ from interact_database_v2 import Database
 from object_DL import Camera
 from TrackingFace import MultiTracker
 from face_graphics import GraphicPyGame
+from flask import Flask, Response
+import queue
+
+RUNNING = True
 
 SHOW_GRAPHICS = True
+STREAM = True
+HOST = '127.0.0.1'
+PORT = 1111
+
 FLAG_TRAINING = False
 FLAG_TAKE_PHOTO = False
 info_pack = ()
@@ -23,7 +31,7 @@ timer = time.time()
 train_timer = time.time()
 
 def sub_task(database, client, graphics=None):
-    global info_pack, SHOW_GRAPHICS, FLAG_TAKE_PHOTO, FLAG_TRAINING, timer, train_timer, time_take_photo, tim_elapsed, bbox_list_online, img_list_online
+    global RUNNING, info_pack, SHOW_GRAPHICS, FLAG_TAKE_PHOTO, FLAG_TRAINING, timer, train_timer, time_take_photo, tim_elapsed, bbox_list_online, img_list_online
     cam = database.getCameraById(1)
     client.subscribe_server()
     multi_tracker = MultiTracker()
@@ -141,14 +149,50 @@ def sub_task(database, client, graphics=None):
             continue
         if key == 32 and FLAG_TRAINING:
             FLAG_TAKE_PHOTO = True
+    RUNNING = False
     cv2.destroyAllWindows()
 
+
+app = Flask(__name__)
+FRAME = None
+q_FRAME = queue.Queue()
+FPS_FRAME = 24
+
+def gen_frame():
+    global FRAME, RUNNING
+    while RUNNING:
+        FRAME = q_FRAME.get()
+
+def gen_client():
+    global FRAME, FPS_FRAME, RUNNING
+    while RUNNING:
+        time.sleep(1./FPS_FRAME)
+        if FRAME is None:
+            continue
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + FRAME + b'\r\n\r\n')
+
+@app.route('/video')
+def video_feed():
+    return Response(gen_client(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def start_web():
+    global app, HOST, PORT
+    threading.Thread(target=gen_frame, args=()).start()
+    threading.Thread(target=app.run, args=(HOST, PORT, False)).start()
+
 def start():
+    global STREAM, SHOW_GRAPHICS
     database = Database(vision_config.DB_HOST,vision_config.DB_USER,vision_config.DB_PASSWD, vision_config.DB_NAME)
     client = service_client_demo.ClientService(database, None)
     if not SHOW_GRAPHICS:
         sub_task(database, client)
     else:
-        graphics = GraphicPyGame(vision_config.SCREEN_SIZE['width'], vision_config.SCREEN_SIZE['height'])
+        if not STREAM:
+            graphics = GraphicPyGame(vision_config.SCREEN_SIZE['width'], vision_config.SCREEN_SIZE['height'])
+        else:
+            graphics = GraphicPyGame(vision_config.SCREEN_SIZE['width'], vision_config.SCREEN_SIZE['height'], queue=q_FRAME)
+            start_web()
         threading.Thread(target=sub_task, args=(database, client, graphics)).start()
         graphics.run()
