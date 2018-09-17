@@ -83,7 +83,7 @@ def sub_task(database, client, graphics=None):
                     time_take_photo = round(time_take_photo,1)
                     if train_timer - tim_elapsed >= 0.4 and time_take_photo > 0:
                         tim_elapsed = time.time()
-                        training_bbox_faces, training_img_faces = service_client_demo.ClientService.face_in_training_area(frame, bboxes, \
+                        training_bbox_faces, training_img_faces = service_client_demo.ClientService.face_in_training_area(img, bboxes, \
                                                                                                 train_area)                                                                       
                         if len(training_bbox_faces) == 1:
                             bbox_list_online.append(training_bbox_faces[0])
@@ -126,7 +126,7 @@ def sub_task(database, client, graphics=None):
         if len(unidentified_tracker) > 0:
             for tracker in unidentified_tracker:
                 if tracker.person is None and tracker.tried < vision_config.NUM_TRIED and (time.time() - tracker.last_time_tried) >= vision_config.DELAY_TRIED:
-                    face = tracker.get_bbox_image(frame)
+                    face = tracker.get_bbox_image(img)
                     client.request_identify_service(face, tracker.id, mode = vision_config.IDEN_MOD)
                     tracker.last_time_tried = time.time()
                     tracker.tried += 1
