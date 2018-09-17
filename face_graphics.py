@@ -126,7 +126,7 @@ class BBox:
         elif self.person is not None:
             color = GraphicPyGame.COLOR_GREEN
             sf_bbox = GraphicPyGame.BBOX_GREEN
-            info = GraphicPyGame.FONT_VIETNAMESE.render(self.person.name, False, GraphicPyGame.COLOR_WHITE)
+            info = GraphicPyGame.FONT_VIETNAMESE.render('{} - {}'.format(self.person.name, self.person.idcode), False, GraphicPyGame.COLOR_WHITE)
             for tn in list_thumbnail:
                 if tn.person.id == self.person.id:
                     pygame.draw.lines(screen, color, False, [(self.x - self.thickness, self.y-self.thickness), (tn.x + Thumbnail.SIZE_X, tn.y)])
@@ -162,6 +162,8 @@ class GraphicPyGame:
         self.list_thumbnail = []
         self.list_bbox = []
         self.queue = queue
+        self.key = None
+        self.fullscreen = False
         
         pygame.init()
         self.mask = pygame.Surface((self.WIDTH, self.HEIGHT))
@@ -171,7 +173,7 @@ class GraphicPyGame:
             pygame.draw.line(self.mask, (255,255,255), (0,i), (self.WIDTH,i))
         GraphicPyGame.FONT_VIETNAMESE = pygame.font.Font('font/Montserrat-Medium.otf', 100)
         GraphicPyGame.FONT_JAPANESE = pygame.font.Font('font/NotoSansMonoCJKjp-Regular.otf', 100)
-        self.screen = pygame.display.set_mode((GraphicPyGame.WIDTH, GraphicPyGame.HEIGHT))
+        self.screen = pygame.display.set_mode((GraphicPyGame.WIDTH, GraphicPyGame.HEIGHT), pygame.RESIZABLE)
         GraphicPyGame.BBOX_GREEN = self.create_bbox_template(GraphicPyGame.COLOR_GREEN)
         GraphicPyGame.BBOX_RED = self.create_bbox_template(GraphicPyGame.COLOR_RED)
         GraphicPyGame.BBOX_WHITE = self.create_bbox_template(GraphicPyGame.COLOR_WHITE)
@@ -283,7 +285,6 @@ class GraphicPyGame:
 
     def run(self):
         clock = pygame.time.Clock()
-        # self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT), pygame.FULLSCREEN )
         id = 0
         while self.running:
             # try:
@@ -299,6 +300,17 @@ class GraphicPyGame:
                     self.running = False
                     pygame.quit() 
                     exit(0)
+                if event.type == pygame.KEYDOWN:
+                    self.key = event.key
+                    if event.key == pygame.K_ESCAPE and self.fullscreen:
+                        self.fullscreen = False
+                        self.screen = pygame.display.set_mode((GraphicPyGame.WIDTH, GraphicPyGame.HEIGHT), pygame.RESIZABLE)
+                    if event.key == pygame.K_F11 and not self.fullscreen:
+                        self.fullscreen = True
+                        self.screen = pygame.display.set_mode((GraphicPyGame.WIDTH, GraphicPyGame.HEIGHT), pygame.FULLSCREEN)
+
+                if event.type == pygame.KEYUP:
+                    self.key = None
             print(time.time() - start_time)
             clock.tick(self.FPS)
             # except Exception as e:

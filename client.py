@@ -12,11 +12,12 @@ from TrackingFace import MultiTracker
 from face_graphics import GraphicPyGame
 from flask import Flask, Response
 import queue
+import pygame
 
 RUNNING = True
 
 SHOW_GRAPHICS = True
-STREAM = True
+STREAM = False
 HOST = '127.0.0.1'
 PORT = 1111
 
@@ -42,6 +43,7 @@ def sub_task(database, client, graphics=None):
         if frame is None:
             time.sleep(0.001)
             continue
+        img = frame.copy()
         fps = int(1./(time.time() - timer + 0.000001))
         timer = time.time()
         client.request_detect_service(frame)
@@ -133,22 +135,28 @@ def sub_task(database, client, graphics=None):
             if not graphics.running:
                 client.stop_service()
                 break
-        multi_tracker.show_info(frame)
-        cv2.putText(frame, 'FPS ' + str(fps), \
-                    vision_config.FPS_POS, cv2.FONT_HERSHEY_SIMPLEX, \
-                    vision_config.FONT_SIZE, vision_config.POS_COLOR, \
-                    vision_config.LINE_THICKNESS, cv2.LINE_AA)
-        cv2.imshow(client.cid, frame) 
-        key = cv2.waitKey(1)
-        if key == 27:
-            client.stop_service()
-            break
-        if key == 32 and not FLAG_TRAINING:
-            threading.Thread(target=interface.get_idCode, args=(database,)).start()
-            # interface.get_idCode()
-            continue
-        if key == 32 and FLAG_TRAINING:
-            FLAG_TAKE_PHOTO = True
+        # multi_tracker.show_info(frame)
+        # cv2.putText(frame, 'FPS ' + str(fps), \
+        #             vision_config.FPS_POS, cv2.FONT_HERSHEY_SIMPLEX, \
+        #             vision_config.FONT_SIZE, vision_config.POS_COLOR, \
+        #             vision_config.LINE_THICKNESS, cv2.LINE_AA)
+        # cv2.imshow(client.cid, frame) 
+        # key = cv2.waitKey(1)
+        # if key == 27:
+        #     client.stop_service()
+        #     break
+        # if key == 32 and not FLAG_TRAINING:
+        #     threading.Thread(target=interface.get_idCode, args=(database,)).start()
+        #     # interface.get_idCode()
+        #     continue
+        # if key == 32 and FLAG_TRAINING:
+        #     FLAG_TAKE_PHOTO = True
+        if graphics.key is not None:
+            if graphics.key == pygame.K_SPACE and not FLAG_TRAINING:
+                threading.Thread(target=interface.get_idCode, args=(database,)).start()
+                continue
+            if graphics.key == pygame.K_SPACE and FLAG_TRAINING:
+                FLAG_TAKE_PHOTO = True
     RUNNING = False
     cv2.destroyAllWindows()
 
