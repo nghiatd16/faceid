@@ -291,7 +291,7 @@ class GraphicPyGame:
             if self.frame is not None:
                 self.update_thumbnail()
                 self.draw()
-                pygame.display.flip()
+                # pygame.display.flip()
             if self.queue is not None:
                 self.queue.put(self.convert_jpeg())
             for event in pygame.event.get():

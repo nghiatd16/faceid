@@ -17,7 +17,7 @@ import pygame
 RUNNING = True
 
 SHOW_GRAPHICS = True
-STREAM = False
+STREAM = True
 HOST = '127.0.0.1'
 PORT = 1111
 
