@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th9 20, 2018 lúc 07:13 PM
+-- Thời gian đã tạo: Th9 20, 2018 lúc 07:22 PM
 -- Phiên bản máy phục vụ: 10.1.34-MariaDB
 -- Phiên bản PHP: 7.2.7
 
@@ -21,6 +21,8 @@ SET time_zone = "+00:00";
 --
 -- Cơ sở dữ liệu: `faceid`
 --
+CREATE DATABASE IF NOT EXISTS `faceid` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `faceid`;
 
 -- --------------------------------------------------------
 
