@@ -15,12 +15,12 @@ import manage_data
 def offline_learning(dataset_path):
     def extract_info_text(path):
         info = open(path, "r")
-        name, age, gender, idcode = info.readlines()
+        name, birthday, gender, idcode = info.readlines()
         name = name[:-1]
-        age = int(age[:-1])
+        birthday = int(birthday[:-1])
         gender = gender[:-1]
         info.close()
-        return (name, age, gender, idcode)
+        return (name, birthday, gender, idcode)
     database = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
     vision_object = Vision(database, mode="only_identify")
     cwd = os.getcwd()
@@ -41,7 +41,7 @@ def offline_learning(dataset_path):
             embedding_list = vision_object.encode_embeddings(list_img)
             embedding_vector = np.mean(embedding_list, axis=0)
             embedding_vector = manage_data.convert_embedding_vector_to_bytes(embedding_vector)
-            name, age, gender, idcode = extract_info_text(os.path.join(folder, "__info__.txt"))
+            name, birthday, gender, idcode = extract_info_text(os.path.join(folder, "__info__.txt"))
             check_person = database.getPersonByIdCode(idcode)
             if check_person is not None:
                 logging.info("person {} is known. Proceed Transfer Learning!".format(check_person))
@@ -61,7 +61,7 @@ def offline_learning(dataset_path):
             face = cv2.imread(face_path)
             face = cv2.resize(face, (Vision.SIZE_OF_INPUT_IMAGE, Vision.SIZE_OF_INPUT_IMAGE))
             b64_face = manage_data.convert_image_to_b64(face)
-            person = Person(name= name, age= age, gender= gender, idcode= idcode, embedding= embedding_vector, b64face= b64_face, b64image= b64_img)
+            person = Person(name= name, birthday= birthday, gender= gender, idcode= idcode, embedding= embedding_vector, b64face= b64_face, b64image= b64_img)
             logging.info("New Learning a person {}".format(person))
             database.insertPerson(person)
         except Exception as e:
@@ -94,7 +94,7 @@ def add_data(img_faces):
 def online_learning(bbox_faces, img_faces, info_pack, vision_object, multiTracker, database):
     if len(img_faces) == 0:
         return
-    name, age, gender, idCode, idCam = info_pack
+    name, birthday, gender, idCode, idCam = info_pack
     manage_data.save_img(img_faces, name)
     # new_thumb = cv2.resize(img_faces[0], (50,50))
     
@@ -107,7 +107,7 @@ def online_learning(bbox_faces, img_faces, info_pack, vision_object, multiTracke
     b64Face = manage_data.convert_image_to_b64(img_faces[0])
     b64Img = manage_data.convert_image_to_b64(img_faces[1])
 
-    new_person = Person(None, name, age, gender, idCode, embed_vector, b64Face,  b64Img)
+    new_person = Person(None, name, birthday, gender, idCode, embed_vector, b64Face,  b64Img)
     new_person = database.insertPerson(new_person)
     database.refetch_table('person')
     # person = database.getPer(new_person)[0]
@@ -121,7 +121,7 @@ def online_learning(bbox_faces, img_faces, info_pack, vision_object, multiTracke
 def online_learning_service(bbox_faces, img_faces, client, info_pack, multiTracker, database):
     if len(img_faces) == 0:
         return
-    msg, name, age, gender, idCode, idCam, embedding_list = info_pack
+    msg, name, birthday, gender, idCode, country, idCam, embedding_list = info_pack
     # manage_data.save_img(img_faces, name)
     # new_thumb = cv2.resize(img_faces[0], (50,50))
     
@@ -132,7 +132,7 @@ def online_learning_service(bbox_faces, img_faces, client, info_pack, multiTrack
     b64Img = manage_data.convert_image_to_b64(img_faces[1])
     if msg == vision_config.NEW_LEARNING_MSG:
         embed_vector = manage_data.convert_embedding_vector_to_bytes(embed_vector)
-        learning_person = Person(None, name, age, gender, idCode, embed_vector, b64Face,  b64Img)
+        learning_person = Person(None, name, birthday, gender, idCode, country, embed_vector, b64Face,  b64Img)
         learning_person = database.insertPerson(learning_person)
     elif msg == vision_config.TRANSFER_LEARNING_MSG:
         learning_person = database.getPersonByIdCode(idCode)

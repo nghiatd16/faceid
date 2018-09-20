@@ -147,7 +147,7 @@ class Database:
                 for row in rows:
                     person = object_DL.Person(id=row['idPerson'], 
                                             name=row['name'], 
-                                            age=row['age'], 
+                                            birthday=row['birthday'], 
                                             gender=row['gender'], 
                                             idcode=row['idCode'], 
                                             embedding=row['embedding'], 
@@ -169,7 +169,7 @@ class Database:
                 for row in rows:
                     return object_DL.Person(id=row['idPerson'], 
                                             name=row['name'], 
-                                            age=row['age'], 
+                                            birthday=row['birthday'], 
                                             gender=row['gender'], 
                                             idcode=row['idCode'], 
                                             embedding=row['embedding'], 
@@ -192,9 +192,10 @@ class Database:
                 for row in rows:
                     return object_DL.Person(id=row['idPerson'], 
                                             name=row['name'], 
-                                            age=row['age'], 
+                                            birthday=row['birthday'], 
                                             gender=row['gender'], 
-                                            idcode=row['idCode'], 
+                                            idcode=row['idCode'],
+                                            country=row['country'], 
                                             embedding=row['embedding'], 
                                             b64face=row['b64Face'], 
                                             b64image=row['b64Image'])
@@ -296,7 +297,7 @@ class Database:
                 for row in rows:
                     person = object_DL.Person(id=row['idPerson'], 
                                             name=row['name'], 
-                                            age=row['age'], 
+                                            birthday=row['birthday'], 
                                             gender=row['gender'], 
                                             idcode=row['idCode'], 
                                             embedding=row['embedding'], 
@@ -339,7 +340,7 @@ class Database:
                 for row in rows:
                     person = object_DL.Person(id=row['idPerson'], 
                                             name=row['name'], 
-                                            age=row['age'], 
+                                            birthday=row['birthday'], 
                                             gender=row['gender'], 
                                             idcode=row['idCode'], 
                                             embedding=row['embedding'], 
@@ -705,7 +706,7 @@ class Database:
 
 if __name__ == "__main__":
     test = Database("localhost", "root", "", "faceid")
-    p = object_DL.Person(name='test', age=18, gender='female', idcode='123123')
+    p = object_DL.Person(name='test', birthday=18, gender='female', idcode='123123')
     # rs = test.selectFromPerson(wherePerson=p)
     rows = test.getImages()
     for row in rows:

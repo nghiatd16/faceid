@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import time
 import base64
+import datetime
 import logging
 
                     
@@ -46,7 +47,19 @@ def save_img(img_faces, name_online, dir_path=vision_config.RAW_IMAGES_DIR):
         path = os.path.join(person_path, str(time.time()) + '.jpg')
         cv2.imwrite(path, im)
         logging.info('Write an image on:'.format(path))
-        
+
+def std_date_format(date):
+    if date is None:
+        return None
+    date = date.replace("/", "-")
+    date = date.replace(".", "-")
+    return datetime.datetime.strptime(date, '%d-%m-%Y')
+
+def convert_date_format(date):
+    if date is None:
+        return None
+    return date.strftime('%d-%m-%Y')
+
 def convert_image_to_b64(image):
     img_bytes = cv2.imencode('.jpg', image)[1].tostring()
     img_b64 = base64.b64encode(img_bytes)

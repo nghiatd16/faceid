@@ -266,6 +266,7 @@ class GraphicPyGame:
         return sf_bbox
 
     def draw(self):
+        st = time.time()
         self.screen.fill(0)
         player = pygame.image.frombuffer(self.frame.tostring(), self.frame.shape[1::-1], 'RGB',)
         self.screen.blit(player, (0, 0))
@@ -274,8 +275,6 @@ class GraphicPyGame:
         for bbox in self.list_bbox:
             bbox.update()
             bbox.draw(self.screen, self.list_thumbnail)
-        # self.screen.blit(self.mask, (0,0))
-
     def convert_jpeg(self):
         data = pygame.image.tostring(self.screen, 'RGB')
         img = Image.frombytes('RGB', (GraphicPyGame.WIDTH, GraphicPyGame.HEIGHT), data)
@@ -308,10 +307,9 @@ class GraphicPyGame:
                     if event.key == pygame.K_F11 and not self.fullscreen:
                         self.fullscreen = True
                         self.screen = pygame.display.set_mode((GraphicPyGame.WIDTH, GraphicPyGame.HEIGHT), pygame.FULLSCREEN)
-
                 if event.type == pygame.KEYUP:
                     self.key = None
-            print(time.time() - start_time)
+            # print(time.time() - start_time)
             clock.tick(self.FPS)
             # except Exception as e:
             #     exc_type, exc_obj, exc_tb = sys.exc_info()

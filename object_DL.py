@@ -1,3 +1,4 @@
+import manage_data
 class Camera:
     def __init__(self, id=None, cameraname=None, httpurl=None, rstpurl=None, location=None):
         self.id = id
@@ -96,18 +97,19 @@ class Location:
     def __str__(self):
         return "[id: {} - longtitude: {} - latitude: {} - location: {}]".format(self.id, self.longtitude, self.latitude, self.location)
 class Person:
-    def __init__(self, id=None, name=None, age=None, gender=None, idcode=None, embedding=None, b64face=None, b64image=None):
+    def __init__(self, id=None, name=None, birthday=None, gender=None, idcode=None, country=None, embedding=None, b64face=None, b64image=None):
         self.id = id
         self.name = name
-        self.age = age
+        self.birthday = birthday
         self.gender = gender
         self.idcode = idcode
+        self.country = country
         self.embedding = embedding
         self.b64face = b64face
         self.b64image = b64image
 
     def get_arr_name_columns(self):
-        return ["idperson", "name", "age", "gender", "idcode", "embedding", "b64face", "b64image"]
+        return ["idperson", "name", "birthday", "gender", "idcode", "country", "embedding", "b64face", "b64image"]
 
     def get_name_columns(self):
         arr = self.get_arr_name_columns()
@@ -119,13 +121,13 @@ class Person:
         return rs
 
     def get_refer(self):
-        return "%s, %s, %s, %s, %s, %s, %s, %s"
+        return "%s, %s, %s, %s, %s, %s, %s, %s, %s"
 
     def get_value(self):
-        return (self.id, self.name, self.age, self.gender, self.idcode, self.embedding, self.b64face, self.b64image)
+        return (self.id, self.name, self.birthday, self.gender, self.idcode, self.country, self.embedding, self.b64face, self.b64image)
 
     def __str__(self):
-        return "[id: {} - name: {} - age: {} - gender: {} - idCode: {}]".format(self.id, self.name, self.age, self.gender, self.idcode)
+        return "[id: {} - name: {} - birthday: {} - gender: {} - idCode: {} - country: {}]".format(self.id, self.name, self.birthday, self.gender, self.idcode, self.country)
 if __name__ == "__main__":
     l = Location(id=3, location="abc", longtitude="132", latitude="321")
     c = Camera(name="abc", httpurl="asdasd", location=l)

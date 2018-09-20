@@ -33,7 +33,6 @@ train_timer = time.time()
 
 def sub_task(database, client, graphics=None):
     global RUNNING, info_pack, SHOW_GRAPHICS, FLAG_TAKE_PHOTO, FLAG_TRAINING, timer, train_timer, time_take_photo, tim_elapsed, bbox_list_online, img_list_online
-    cam = database.getCameraById(1)
     client.subscribe_server()
     multi_tracker = MultiTracker()
     client.record()
@@ -55,11 +54,12 @@ def sub_task(database, client, graphics=None):
             FLAG_TRAINING = True
             person = interface.result
             name = person.name
-            age = person.age
+            birthday = person.birthday
             gender = person.gender
             idCode = person.idcode
+            country = person.country
             idCam = 1
-            info_pack = (interface.msg_result, name, age, gender, idCode, idCam)
+            info_pack = (interface.msg_result, name, birthday, gender, idCode, country, idCam)
             interface.reset()
         if FLAG_TRAINING:
             if time_take_photo > 0.2:
@@ -104,8 +104,8 @@ def sub_task(database, client, graphics=None):
                 # learning.online_learning(bbox_list_online, img_list_online, \
                 #                                     info_pack, vision_object, multi_tracker, database)
                 embed_list = client.request_embed_faces(img_list_online)
-                msg, name, age, gender, idCode, idCam = info_pack
-                pass_pack = (msg, name, age, gender, idCode, idCam, embed_list)
+                msg, name, birthday, gender, idCode, country, idCam = info_pack
+                pass_pack = (msg, name, birthday, gender, idCode, country, idCam, embed_list)
                 learning.online_learning_service(bbox_list_online, img_list_online, client,\
                                                 pass_pack, multi_tracker, database)
                 info_pack = None
@@ -163,7 +163,7 @@ def sub_task(database, client, graphics=None):
 
 app = Flask(__name__)
 FRAME = None
-q_FRAME = queue.Queue()
+q_FRAME = queue.Queue(maxsize=2)
 FPS_FRAME = 24
 
 def gen_frame():
@@ -193,6 +193,7 @@ def start_web():
 def start():
     global STREAM, SHOW_GRAPHICS
     database = Database(vision_config.DB_HOST,vision_config.DB_USER,vision_config.DB_PASSWD, vision_config.DB_NAME)
+    cam = database.getCameraById(1)
     client = service_client_demo.ClientService(database, None)
     if not SHOW_GRAPHICS:
         sub_task(database, client)

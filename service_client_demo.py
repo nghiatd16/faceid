@@ -49,10 +49,13 @@ class ClientService:
     def record(self):
         def __rec(self):
             while self.__FLAGS.RUNNING and self.capture.isOpened():
-                ret, frame = self.capture.read()
-                if ret and self.frame_queue.full():
-                    self.frame_queue.get(timeout = 1)
-                self.frame_queue.put(np.copy(frame), timeout = 1)
+                try:
+                    ret, frame = self.capture.read()
+                    if ret and self.frame_queue.full():
+                        self.frame_queue.get(timeout = 1)
+                    self.frame_queue.put(np.copy(frame), timeout = 1)
+                except:
+                    pass
                 # cv2.imshow("tmp", frame)
                 # cv2.waitKey(1)
         threading.Thread(target=__rec, args=(self,)).start()
@@ -168,7 +171,10 @@ class ClientService:
             time.sleep(0.1)
         return embed_lst
     def get_frame_from_queue(self):
-        frame = self.frame_queue.get(timeout = 1)
+        try:
+            frame = self.frame_queue.get(timeout = 1)
+        except:
+            return None
         return frame
 
     @staticmethod

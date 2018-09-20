@@ -3,6 +3,7 @@ import _thread
 import time
 import vision_config
 import logging
+import manage_data
 from interact_database_v2 import Database
 from object_DL import Person
 STATUS_INACTIVE = 0
@@ -13,8 +14,8 @@ STATUS_CONFIRM = 3
 result = None
 msg_result = None
 
-# db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
-db = None
+db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
+# db = None
 def response_idCode_OK(idCode):
     person = db.getPersonByIdCode(idCode)
     if person is None:
@@ -60,9 +61,9 @@ def center(win):
 def show_information(msg, person):
     name = person.name
     idCode = person.idcode
-    age = person.age
+    birthday = person.birthday
     gender = person.gender
-
+    country = person.country
     global STATUS
     STATUS = STATUS_CONFIRM
     label = None
@@ -70,7 +71,7 @@ def show_information(msg, person):
     root.title("Information")
     # root.geometry("500x50+100+100")
     row = Frame(root)
-    width_box = int(len(name)) + 10
+    width_box = int(len(name)) + 15
     notice = Label(row, text=msg, width=width_box, font=(16), anchor='w')
     notice.pack(side=TOP)
 
@@ -80,11 +81,14 @@ def show_information(msg, person):
     name_lb = Label(row, text="Full Name: {}".format(name), width=width_box, font=(16), anchor="w")
     name_lb.pack(side = TOP)
     
-    age_lb = Label(row, text="Age: {}".format(age), width=width_box, font=(16), anchor="w")
-    age_lb.pack(side = TOP)
+    birthday_lb = Label(row, text="Birthday: {}".format(manage_data.convert_date_format(birthday)), width=width_box, font=(16), anchor="w")
+    birthday_lb.pack(side = TOP)
 
     gender_lb = Label(row, text="Gender: {}".format(gender), width=width_box, font=(16), anchor="w")
     gender_lb.pack(side = TOP)
+
+    country_lb = Label(row, text="Country: {}".format(country), width=width_box, font=(16), anchor="w")
+    country_lb.pack(side = TOP)
 
     row.pack(side=TOP, fill=X, padx=5, pady=5)
     check = 0
@@ -128,11 +132,11 @@ def get_information(idCode):
     name_txt.pack(side=TOP, expand=YES, fill=X)
     name_txt.focus_set()
 
-    age_lb = Label(row, text="Age", width=12, font=(16), anchor="w")
-    age_lb.pack(side = TOP)
+    birthday_lb = Label(row, text="Birthday", width=12, font=(16), anchor="w")
+    birthday_lb.pack(side = TOP)
 
-    age_txt = Entry(row, width=18, font=16)
-    age_txt.pack(side=TOP, expand=YES, fill=X)
+    birthday_txt = Entry(row, width=18, font=16)
+    birthday_txt.pack(side=TOP, expand=YES, fill=X)
 
     gender_lb = Label(row, text="Gender", width=12, font=(16), anchor="w")
     gender_lb.pack(side = TOP)
@@ -140,6 +144,11 @@ def get_information(idCode):
     gender_txt = Entry(row, width=18, font=16)
     gender_txt.pack(side=TOP, expand=YES, fill=X)
 
+    country_lb = Label(row, text="Country", width=12, font=(16), anchor="w")
+    country_lb.pack(side = TOP)
+
+    country_txt = Entry(row, width=18, font=16)
+    country_txt.pack(side=TOP, expand=YES, fill=X)
     
     row.pack(side=TOP, fill=X, padx=5, pady=5)
     check = 0
@@ -150,13 +159,19 @@ def get_information(idCode):
         if len(name_txt.get()) == 0:
             name_txt.focus_set()
             return
-        if len(age_txt.get()) == 0:
-            age_txt.focus_set()
+        if len(birthday_txt.get()) == 0:
+            birthday_txt.focus_set()
             return
         if len(gender_txt.get()) == 0:
             gender_txt.focus_set()
             return
-        new_person = Person(name=name_txt.get(), age= int(age_txt.get()), gender=gender_txt.get(), idcode=idCode)
+        if len(country_txt.get()) == 0:
+            country_txt.focus_set()
+            return
+        birthday = manage_data.std_date_format(birthday_txt.get())
+        if birthday == "-1":
+            return
+        new_person = Person(name=name_txt.get(), birthday= birthday, gender=gender_txt.get(), idcode=idCode, country=country_txt.get())
         # root.quit()
         show_information(vision_config.NEW_LEARNING_MSG, new_person)
         
