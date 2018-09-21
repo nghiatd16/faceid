@@ -16,10 +16,10 @@ import pygame
 
 RUNNING = True
 
-SHOW_GRAPHICS = True
+SHOW_GRAPHICS = False
 STREAM = True
 HOST = '127.0.0.1'
-PORT = 1111
+PORT = 80
 
 FLAG_TRAINING = False
 FLAG_TAKE_PHOTO = False
@@ -153,7 +153,7 @@ def sub_task(database, client, graphics=None):
         #     FLAG_TAKE_PHOTO = True
         if graphics.key is not None:
             if graphics.key == pygame.K_SPACE and not FLAG_TRAINING:
-                threading.Thread(target=interface.get_idCode, args=(database,)).start()
+                threading.Thread(target=interface.get_idCode, args=(database,), daemon= True).start()
                 continue
             if graphics.key == pygame.K_SPACE and FLAG_TRAINING:
                 FLAG_TAKE_PHOTO = True
@@ -190,11 +190,13 @@ def start_web():
     threading.Thread(target=gen_frame, args=()).start()
     threading.Thread(target=app.run, args=(HOST, PORT, False)).start()
 
-def start():
+def start(cam_id = None):
     global STREAM, SHOW_GRAPHICS
     database = Database(vision_config.DB_HOST,vision_config.DB_USER,vision_config.DB_PASSWD, vision_config.DB_NAME)
-    cam = database.getCameraById(1)
-    client = service_client_demo.ClientService(database, None)
+    cam = None
+    if cam_id is not None:
+        cam = database.getCameraById(int(cam_id))
+    client = service_client_demo.ClientService(database, cam)
     if not SHOW_GRAPHICS:
         sub_task(database, client)
     else:
@@ -203,5 +205,5 @@ def start():
         else:
             graphics = GraphicPyGame(vision_config.SCREEN_SIZE['width'], vision_config.SCREEN_SIZE['height'], queue=q_FRAME)
             start_web()
-        threading.Thread(target=sub_task, args=(database, client, graphics)).start()
+        threading.Thread(target=sub_task, args=(database, client, graphics,), daemon= True).start()
         graphics.run()

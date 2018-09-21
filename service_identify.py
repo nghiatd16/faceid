@@ -25,7 +25,7 @@ class FaceIdentifyService:
         except:
             raise ConnectionError('Cannot connect to database')
         self.vision_object = Vision(mode='only_identify', database=database)
-        threading.Thread(target=self.refetch_db).start()
+        threading.Thread(target=self.refetch_db, daemon= True).start()
     def refetch_db(self):
         self.rd.set(vision_config.FLAG_REFETCH_DB, b"0")
         while True:

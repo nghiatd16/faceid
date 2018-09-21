@@ -27,7 +27,9 @@ class Vision:
             raise TypeError("You have to pass database with mode '{}'".format(mode))
         logging.info("An vision object has been created with mode `{}`".format(mode))
         if mode != 'only_detect':
-            self.__embedding_encoder = predictor.from_saved_model("exported_model")
+            gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.15)
+            config = tf.ConfigProto(gpu_options=gpu_options)
+            self.__embedding_encoder = predictor.from_saved_model("exported_model", config=config)
             self.__database_empty = True
             self.__classifier = KNeighborsClassifier(n_neighbors=5, algorithm='ball_tree', weights='distance')
         if mode != 'only_identify':
@@ -58,7 +60,9 @@ class Vision:
                 config = tf.ConfigProto(device_count = {'GPU': 0})
                 sess = tf.Session(config=config)
             else:
-                sess = tf.Session()
+                gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.15)
+                config = tf.ConfigProto(gpu_options=gpu_options)
+                sess = tf.Session(config= config)
             with sess.as_default():
                 pnet, rnet, onet = df.create_mtcnn(sess, None)
         return (pnet, rnet, onet)

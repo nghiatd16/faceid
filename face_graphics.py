@@ -3,7 +3,7 @@ from pygame.locals import *
 import cv2
 import time
 import numpy as np
-import _thread
+import threading
 from random import randint
 from object_DL import Person
 from TrackingFace import MultiTracker
@@ -291,7 +291,7 @@ class GraphicPyGame:
             if self.frame is not None:
                 self.update_thumbnail()
                 self.draw()
-                # pygame.display.flip()
+                pygame.display.flip()
             if self.queue is not None:
                 self.queue.put(self.convert_jpeg())
             for event in pygame.event.get():
@@ -328,6 +328,6 @@ def run_video(graphic):
 if __name__ == '__main__':
     # img = cv2.imread('image.jpg')
     graphic = GraphicPyGame(640, 480)
-    _thread.start_new_thread(run_video, (graphic,))
+    threading.Thread(target=run_video, args=(graphic,), daemon=True).start()
     graphic.run()
         

@@ -9,6 +9,8 @@ parser.add_argument("-iden", help="-run : start identify_service", dest="iden", 
 parser.set_defaults(iden=False)
 parser.add_argument("-client", help="-run : start client_service", dest="client", action="store_true")
 parser.set_defaults(client=False)
+parser.add_argument("-camid", help="-camid : set camera for client service", dest="camid", action="store")
+parser.set_defaults(camid=None)
 
 def main(args):
     if args.master:
@@ -24,6 +26,6 @@ def main(args):
         service_identify.FaceIdentifyService().run()
     if args.client:
         import client
-        client.start()
+        client.start(args.camid)
 if __name__ == '__main__':
     main(parser.parse_args())

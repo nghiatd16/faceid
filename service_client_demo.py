@@ -29,7 +29,11 @@ class ClientService:
         self.identify_service_line = redis.StrictRedis(host='localhost', port=6379)
         self.subscribe_object = self.detect_service_line.pubsub()
         if self.camera is not None:
-            self.capture = cv2.VideoCapture(camera.httpurl)
+            try:
+                self.capture = cv2.VideoCapture(camera.httpurl)
+            except:
+                self.capture = cv2.VideoCapture(camera.rstpurl)
+                pass
             logging.info("Video Capture device is camera [ id: {} - name: {} - httpurl: {} - rstpurl: {} - location: {}]".format(\
                                                     camera.id, camera.cameraname, camera.httpurl, camera.rstpurl, camera.location))
         else:
