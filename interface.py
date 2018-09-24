@@ -14,8 +14,8 @@ STATUS_CONFIRM = 3
 result = None
 msg_result = None
 
-db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
-# db = None
+db = None
+# db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
 def response_idCode_OK(idCode):
     person = db.getPersonByIdCode(idCode)
     if person is None:
@@ -101,7 +101,6 @@ def show_information(msg, person):
     def call_cancel(event=None):
         global STATUS
         STATUS = STATUS_INPROGRESS
-        root.quit()
         root.destroy()
     btn_ok = Button(root, text="Accept", width=10, command=call_ok)
     btn_ok.pack(side=LEFT, padx=5, pady=5)
@@ -154,6 +153,7 @@ def get_information(idCode):
     check = 0
 
     def call_ok(event=None):
+        global STATUS
         if STATUS == STATUS_CONFIRM:
             return
         if len(name_txt.get()) == 0:
@@ -174,11 +174,13 @@ def get_information(idCode):
         new_person = Person(name=name_txt.get(), birthday= birthday, gender=gender_txt.get(), idcode=idCode, country=country_txt.get())
         # root.quit()
         show_information(vision_config.NEW_LEARNING_MSG, new_person)
-        
         if STATUS == STATUS_DONE:
+            root.quit()
             root.destroy()
+            # STATUS = STATUS_INACTIVE
 
     def call_cancel(event=None):
+        global STATUS
         if STATUS == STATUS_CONFIRM:
             return
         response_cancel()
@@ -218,7 +220,6 @@ def get_idCode(database):
         idCode = idCode_txt.get()
         if not str.isdigit(idCode):
             return
-        idCode = int(idCode)
         root.destroy()
         response_idCode_OK(idCode)
         
