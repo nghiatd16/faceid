@@ -27,7 +27,7 @@ class Vision:
             raise TypeError("You have to pass database with mode '{}'".format(mode))
         logging.info("An vision object has been created with mode `{}`".format(mode))
         if mode != 'only_detect':
-            gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.15)
+            gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.3)
             config = tf.ConfigProto(gpu_options=gpu_options)
             self.__embedding_encoder = predictor.from_saved_model("exported_model", config=config)
             self.__database_empty = True
@@ -60,7 +60,7 @@ class Vision:
                 config = tf.ConfigProto(device_count = {'GPU': 0})
                 sess = tf.Session(config=config)
             else:
-                gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.15)
+                gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.3)
                 config = tf.ConfigProto(gpu_options=gpu_options)
                 sess = tf.Session(config= config)
             with sess.as_default():
@@ -88,17 +88,15 @@ class Vision:
     def face_detector(self, frame):
         if self.mode == 'only_identify':
             raise Exception('vision_object is on mode only_identify, cannot detect face')
-        dt_frame = cv2.resize(frame, (int(frame.shape[1]/vision_config.DETECT_SCALE), \
-                                      int(frame.shape[0]/vision_config.DETECT_SCALE)))
-        bboxes, _ = df.detect_face(dt_frame, self.__detect_face_minsize,\
+        bboxes, _ = df.detect_face(frame, self.__detect_face_minsize,\
                                    self.__pnet, self.__rnet, self.__onet, \
                                    self.__detect_face_threshold, self.__detect_face_factor)
         faces = []
         for bbox in bboxes:
-            x1 = int(bbox[2] * vision_config.DETECT_SCALE)
-            y1 = int(bbox[3] * vision_config.DETECT_SCALE)
-            x = int(bbox[0] * vision_config.DETECT_SCALE)
-            y = int(bbox[1] * vision_config.DETECT_SCALE)
+            x1 = int(bbox[2])
+            y1 = int(bbox[3])
+            x = int(bbox[0])
+            y = int(bbox[1])
             if (x1-x) > 0 and (y1-y) > 0:
                 faces.append((x, y, x1, y1))
         faces = Vision.align_faces(faces, full_coordinate= True)
@@ -109,8 +107,6 @@ class Vision:
             raise Exception('vision_object is on mode only_identify, cannot detect face')
         list_dt_frame = []
         for frame in list_frame:
-            dt_frame = cv2.resize(frame, (int(frame.shape[1]/vision_config.DETECT_SCALE), \
-                                      int(frame.shape[0]/vision_config.DETECT_SCALE)))
             list_dt_frame.append(dt_frame)
         rets = df.bulk_detect_face(list_dt_frame, 1/5,\
                                    self.__pnet, self.__rnet, self.__onet, \
@@ -123,10 +119,10 @@ class Vision:
             bboxes, _ = ret
             faces = []
             for bbox in bboxes:
-                x1 = int(bbox[2] * vision_config.DETECT_SCALE)
-                y1 = int(bbox[3] * vision_config.DETECT_SCALE)
-                x = int(bbox[0] * vision_config.DETECT_SCALE)
-                y = int(bbox[1] * vision_config.DETECT_SCALE)
+                x1 = int(bbox[2])
+                y1 = int(bbox[3])
+                x = int(bbox[0])
+                y = int(bbox[1])
                 if (x1-x) > 0 and (y1-y) > 0:
                     faces.append((x, y, x1, y1))
             faces = Vision.align_faces(faces, full_coordinate= True)

@@ -11,3 +11,4 @@ Wrong_Identify/
 convert_meta_data.py
 test.py
 *.jpg/
+test_cam.py

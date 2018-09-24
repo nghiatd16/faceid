@@ -34,8 +34,7 @@ class ClientService:
             except:
                 self.capture = cv2.VideoCapture(camera.rstpurl)
                 pass
-            logging.info("Video Capture device is camera [ id: {} - name: {} - httpurl: {} - rstpurl: {} - location: {}]".format(\
-                                                    camera.id, camera.cameraname, camera.httpurl, camera.rstpurl, camera.location))
+            logging.info("Video Capture device is camera ".format(camera))
         else:
             self.capture = cv2.VideoCapture(0)
             logging.info("Video Capture device is default webcam")
@@ -62,7 +61,7 @@ class ClientService:
                     pass
                 # cv2.imshow("tmp", frame)
                 # cv2.waitKey(1)
-        threading.Thread(target=__rec, args=(self,)).start()
+        threading.Thread(target=__rec, args=(self,), daemon=True).start()
     
     def subscribe_server(self):
         if self.__FLAGS.SUBSCRIBED:
@@ -103,7 +102,8 @@ class ClientService:
 
     def request_detect_service(self, frame):
         IN = self.subscribed_server_info["IN"]
-        ret, jpeg = cv2.imencode(".jpg", frame)
+        dt_frame = cv2.resize(frame, (int(frame.shape[1]/vision_config.DETECT_SCALE), int(frame.shape[0]/vision_config.DETECT_SCALE)))
+        ret, jpeg = cv2.imencode(".jpg", dt_frame)
         bytebuf = jpeg.tobytes()
         self.detect_service_line.ltrim(IN, 0, 0)
         self.detect_service_line.lpush(IN, bytebuf)
@@ -119,6 +119,8 @@ class ClientService:
         ret = False
         if len(bboxes) > 0:
             bboxes = np.reshape(bboxes, (-1, 4))
+            bboxes = bboxes * vision_config.DETECT_SCALE
+            # bboxes = np.matmul(bboxes, vision_config.DETECT_SCALE)
             ret = True
         return (ret, bboxes)
     

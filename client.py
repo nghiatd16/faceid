@@ -16,8 +16,8 @@ import pygame
 
 RUNNING = True
 
-SHOW_GRAPHICS = False
-STREAM = True
+SHOW_GRAPHICS = True
+STREAM = False
 HOST = '127.0.0.1'
 PORT = 80
 
@@ -97,7 +97,7 @@ def sub_task(database, client, graphics=None):
                             info_pack = None
                             bbox_list_online.clear()
                             img_list_online.clear()
-                            flag_training_online = False
+                            FLAG_TRAINING = False
                             name_interface = None
                             time_take_photo = 2
             if FLAG_TAKE_PHOTO == False and len(bbox_list_online) > 0:
@@ -151,12 +151,13 @@ def sub_task(database, client, graphics=None):
         #     continue
         # if key == 32 and FLAG_TRAINING:
         #     FLAG_TAKE_PHOTO = True
-        if graphics.key is not None:
-            if graphics.key == pygame.K_SPACE and not FLAG_TRAINING:
-                threading.Thread(target=interface.get_idCode, args=(database,), daemon= True).start()
-                continue
-            if graphics.key == pygame.K_SPACE and FLAG_TRAINING:
-                FLAG_TAKE_PHOTO = True
+        if SHOW_GRAPHICS:
+            if graphics.key is not None:
+                if graphics.key == pygame.K_SPACE and not FLAG_TRAINING and interface.STATUS == interface.STATUS_INACTIVE:
+                    threading.Thread(target=interface.get_idCode, args=(database,)).start()
+                    continue
+                if graphics.key == pygame.K_SPACE and FLAG_TRAINING:
+                    FLAG_TAKE_PHOTO = True
     RUNNING = False
     cv2.destroyAllWindows()
 
