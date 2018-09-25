@@ -100,16 +100,18 @@ class Person:
     def __init__(self, id=None, name=None, birthday=None, gender=None, idcode=None, country=None, embedding=None, b64face=None, b64image=None):
         self.id = id
         self.name = name
+        self.unicodeName = None
         self.birthday = birthday
         self.gender = gender
         self.idcode = idcode
         self.country = country
+        self.description = None
         self.embedding = embedding
         self.b64face = b64face
         self.b64image = b64image
 
     def get_arr_name_columns(self):
-        return ["idperson", "name", "birthday", "gender", "idcode", "country", "embedding", "b64face", "b64image"]
+        return ["idperson", "name", "unicodeName" ,"birthday", "gender", "idcode", "country", "description" ,"embedding", "b64face", "b64image"]
 
     def get_name_columns(self):
         arr = self.get_arr_name_columns()
@@ -121,10 +123,10 @@ class Person:
         return rs
 
     def get_refer(self):
-        return "%s, %s, %s, %s, %s, %s, %s, %s, %s"
+        return "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s"
 
     def get_value(self):
-        return (self.id, self.name, self.birthday, self.gender, self.idcode, self.country, self.embedding, self.b64face, self.b64image)
+        return (self.id, self.name, self.unicodeName, self.birthday, self.gender, self.idcode, self.country, self.description, self.embedding, self.b64face, self.b64image)
 
     def __str__(self):
         return "[id: {} - name: {} - birthday: {} - gender: {} - idCode: {} - country: {}]".format(self.id, self.name, self.birthday, self.gender, self.idcode, self.country)

@@ -146,10 +146,11 @@ class Database:
                 results = []
                 for row in rows:
                     person = object_DL.Person(id=row['idPerson'], 
-                                            name=row['name'], 
+                                            name=row['name'],
                                             birthday=row['birthday'], 
                                             gender=row['gender'], 
-                                            idcode=row['idCode'], 
+                                            idcode=row['idCode'],
+                                            country=row['country'],
                                             embedding=row['embedding'], 
                                             b64face=row['b64Face'], 
                                             b64image=row['b64Image'])
@@ -168,10 +169,11 @@ class Database:
                 rows = self.__mycursor.fetchall()
                 for row in rows:
                     return object_DL.Person(id=row['idPerson'], 
-                                            name=row['name'], 
+                                            name=row['name'],
                                             birthday=row['birthday'], 
                                             gender=row['gender'], 
-                                            idcode=row['idCode'], 
+                                            idcode=row['idCode'],
+                                            country=row['country'],
                                             embedding=row['embedding'], 
                                             b64face=row['b64Face'], 
                                             b64image=row['b64Image'])
@@ -191,11 +193,11 @@ class Database:
                 rows = self.__mycursor.fetchall()
                 for row in rows:
                     return object_DL.Person(id=row['idPerson'], 
-                                            name=row['name'], 
+                                            name=row['name'],
                                             birthday=row['birthday'], 
                                             gender=row['gender'], 
                                             idcode=row['idCode'],
-                                            country=row['country'], 
+                                            country=row['country'],
                                             embedding=row['embedding'], 
                                             b64face=row['b64Face'], 
                                             b64image=row['b64Image'])
