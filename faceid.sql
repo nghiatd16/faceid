@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th9 26, 2018 lúc 08:47 AM
+-- Thời gian đã tạo: Th9 26, 2018 lúc 09:18 AM
 -- Phiên bản máy phục vụ: 10.1.30-MariaDB
 -- Phiên bản PHP: 7.2.1
 
@@ -35,6 +35,7 @@ CREATE TABLE `camera` (
   `cameraName` varchar(255) NOT NULL,
   `HTTPUrl` varchar(255) NOT NULL,
   `RSTPUrl` varchar(255) NOT NULL,
+  `outHTTPUrl` varchar(255) DEFAULT NULL,
   `idLocation` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -42,8 +43,8 @@ CREATE TABLE `camera` (
 -- Đang đổ dữ liệu cho bảng `camera`
 --
 
-INSERT INTO `camera` (`idCamera`, `cameraName`, `HTTPUrl`, `RSTPUrl`, `idLocation`) VALUES
-(1, 'Camera 1', 'http://192.168.43.1:8080/video', '', 1);
+INSERT INTO `camera` (`idCamera`, `cameraName`, `HTTPUrl`, `RSTPUrl`, `outHTTPUrl`, `idLocation`) VALUES
+(1, 'Camera 1', 'http://192.168.43.1:8080/video', '', 'http://127.0.0.1:8888/video', 1);
 
 -- --------------------------------------------------------
 
@@ -264,7 +265,7 @@ CREATE TABLE `location` (
 --
 
 INSERT INTO `location` (`idLocation`, `longtitude`, `latitude`, `location`) VALUES
-(1, 124.1525125, 102.12412213, 'Cung văn hóa Trí Thức');
+(1, 124.1525125, 102.12412213, 'Tinh Van Lab');
 
 -- --------------------------------------------------------
 

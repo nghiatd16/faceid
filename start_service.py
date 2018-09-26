@@ -11,6 +11,8 @@ parser.add_argument("-client", help="-run : start client_service", dest="client"
 parser.set_defaults(client=False)
 parser.add_argument("-camid", help="-camid : set camera for client service", dest="camid", action="store")
 parser.set_defaults(camid=None)
+parser.add_argument("-port", help="-port : set port streaming client service", dest="port", action="store")
+parser.set_defaults(port=8888)
 
 def main(args):
     if args.master:
@@ -26,6 +28,6 @@ def main(args):
         service_identify.FaceIdentifyService().run()
     if args.client:
         import client
-        client.start(args.camid)
+        client.start(args.camid, port=args.port)
 if __name__ == '__main__':
     main(parser.parse_args())
