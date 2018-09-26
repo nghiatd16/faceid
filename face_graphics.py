@@ -29,7 +29,7 @@ class Thumbnail:
         self.person = person
         self.face = np.frombuffer(base64.decodestring(self.person.b64image.encode()), dtype=np.uint8)
         self.face = cv2.imdecode(self.face, cv2.IMREAD_COLOR)
-        self.face = cv2.cvtColor(self.face, cv2.COLOR_BGR2RGB)
+        self.face = cv2.resize(self.face, (self.SIZE_Y-2*self.THICK, self.SIZE_Y-2*self.THICK))
 
         self.last_time = time.time()
         self.x = 0 - Thumbnail.SIZE_X - int((Thumbnail.PAD + Thumbnail.SIZE_Y)*Thumbnail.SPEED_X/Thumbnail.SPEED_Y)
@@ -52,11 +52,17 @@ class Thumbnail:
         s.blit(player, (self.THICK, self.THICK))
         screen.blit(s, (self.x, self.y))
 
+    def draw_cv2(self, frame):
+        cv2.rectangle(frame, (0,0), (self.SIZE_Y, self.SIZE_Y), GraphicOpenCV.COLOR_GREEN, -1)
+        frame[self.THICK:self.SIZE_Y-self.THICK,self.THICK:self.SIZE_Y-self.THICK,:] = self.face
+        return frame
+
 class BBox:
     TEXT_FACTOR = 0.1
     MIN_TEXT = 15
     MARGIN_POS = 0.05
     MARGIN_SIZE = 0.05
+    THICKNESS = 1
     SPEED_POS = 25
     SPEED_SIZE = 50
 
@@ -72,9 +78,7 @@ class BBox:
         self.y = int(self.target_y + self.target_h/2)
         self.w = 1
         self.h = 1
-        self.thickness = max(1, int(min(self.w, self.h)/100))
-        if self.thickness % 2 == 0:
-            self.thickness += 1
+        self.thickness = max(1, int(1.*min(self.w, self.h)/80))
         self.person = person
         self.matching = matching
     
@@ -111,7 +115,7 @@ class BBox:
             self.h = min(self.h + self.SPEED_SIZE, self.target_h)
         elif self.h > self.target_h:
             self.h = max(self.h - self.SPEED_SIZE, self.target_h)
-
+        self.thickness = max(1, int(1.*min(self.w, self.h)/80))
 
     def draw(self, screen, list_thumbnail):
         info = None
@@ -141,13 +145,59 @@ class BBox:
             info = pygame.transform.scale(info, (int(min_h*info_w/info_h), min_h))
             screen.blit(info, (self.x, self.y + self.h + 3*self.thickness))
 
+    def draw_cv2(self, frame, list_thumbnail):
+        if not (0 <= self.x and self.x + self.w <= frame.shape[1] and 0 <= self.y and self.y + self.h <= frame.shape[0]):
+            return frame
+        info = None
+        sf_bbox = None
+        if self.person is None and self.matching:
+            color = GraphicPyGame.COLOR_WHITE
+        elif self.person is None and not self.matching:
+            color = GraphicPyGame.COLOR_RED
+            # info = GraphicPyGame.FONT_VIETNAMESE.render('Unknown', False, GraphicPyGame.COLOR_RED)
+        elif self.person is not None:
+            color = GraphicPyGame.COLOR_GREEN
+            # info = GraphicPyGame.FONT_VIETNAMESE.render('{} - {}'.format(self.person.name, self.person.idcode), False, GraphicPyGame.COLOR_WHITE)
+            # for tn in list_thumbnail:
+            #     if tn.person.id == self.person.id:
+            #         cv2.line(frame, (self.x - self.thickness, self.y-self.thickness), (tn.x + Thumbnail.SIZE_X, tn.y), color, self.thickness)
+            #         break
+
+        thickness = self.thickness
+
+        x_min, y_min, w, h = (self.x, self.y, self.w, self.h)
+        x_max = x_min + w
+        y_max = y_min + h
+        dis_center = int(1/5 * w)
+        center_x = int((x_min+x_max)/2)
+        center_y = int((y_min+y_max)/2)
+
+        cv2.line(frame, (x_min,y_min), (center_x - dis_center, y_min), color, thickness)
+        cv2.line(frame, (center_x + dis_center, y_min), (x_max, y_min), color, thickness)
+
+        cv2.line(frame, (x_min, y_max), (center_x - dis_center, y_max), color, thickness)
+        cv2.line(frame, (center_x + dis_center, y_max), (x_max, y_max), color, thickness)
+
+        cv2.line(frame, (x_min, y_min), (x_min, center_y - dis_center), color, thickness)
+        cv2.line(frame, (x_min, center_y + dis_center), (x_min, y_max), color, thickness)
+
+        cv2.line(frame, (x_max, y_min), (x_max, center_y - dis_center), color, thickness)
+        cv2.line(frame, (x_max, center_y + dis_center), (x_max, y_max), color, thickness)
+
+        line_center_len = int(1/15 * w)
+        cv2.line(frame, (center_x, y_min - line_center_len), (center_x, y_min + line_center_len), color, thickness)
+        cv2.line(frame, (center_x, y_max - line_center_len), (center_x, y_max + line_center_len), color, thickness)
+        cv2.line(frame, (x_min - line_center_len, center_y), (x_min + line_center_len, center_y), color, thickness)
+        cv2.line(frame, (x_max - line_center_len, center_y), (x_max + line_center_len, center_y), color, thickness)
+        return frame
+
 class GraphicPyGame:
     FPS = 24
     WIDTH = 0
     HEIGHT = 0
-    COLOR_GREEN = (40,190,80)
+    COLOR_GREEN = (80,190,40)
     COLOR_WHITE = (255,255,255)
-    COLOR_RED = (190,40,40)
+    COLOR_RED = (40,40,190)
     FONT_VIETNAMESE = None
     FONT_JAPANESE = None
     BBOX_GREEN = None
@@ -317,6 +367,128 @@ class GraphicPyGame:
             #     print(exc_type, fname, exc_tb.tb_lineno)
             #     self.running = False
             #     break
+
+class GraphicOpenCV:
+    FPS = 24
+    COLOR_GREEN = (40,190,80)
+    COLOR_WHITE = (255,255,255)
+    COLOR_RED = (190,40,40)
+
+    def __init__(self, display=True, queue=None):
+        self.frame = None
+        self.screen = None
+        self.running = True
+        self.queue = queue
+        self.list_thumbnail = []
+        self.list_bbox = []
+        self.key = None
+        self.display = display
+
+    def set_frame(self, frame):
+        self.frame = frame.copy()
+
+    def put_update(self, frame, multi_tracker):
+        self.frame = frame
+        tmp = []
+        for tracker in multi_tracker.get_multitracker():
+            bbox = None
+            for item in self.list_bbox:
+                if item.id == tracker.id:
+                    bbox = item
+                    break
+            if tracker.person is None and tracker.receive < vision_config.NUM_TRIED:
+                if bbox is None:
+                    bbox = BBox(tracker.id, tracker.bounding_box, None, True)
+                else:
+                    bbox.update_bbox(tracker.bounding_box, None, True)
+            elif tracker.person is None:
+                if bbox is None:
+                    bbox = BBox(tracker.id, tracker.bounding_box, None, False)
+                else:
+                    bbox.update_bbox(tracker.bounding_box, None, False)
+            else:
+                if bbox is None:
+                    bbox = BBox(tracker.id, tracker.bounding_box, tracker.person, False)
+                else:
+                    bbox.update_bbox(tracker.bounding_box, tracker.person, False)
+                self.add_thumbnail(tracker.person)
+            tmp.append(bbox)
+        self.list_bbox = tmp
+
+    def add_thumbnail(self, person):
+        for tn in self.list_thumbnail:
+            if tn.person.id == person.id:
+                tn.last_time = time.time()
+                return
+        tn = Thumbnail(person, 0)
+        self.list_thumbnail.insert(0, tn)
+        for i in range(1, len(self.list_thumbnail)):
+            self.list_thumbnail[i].set_position(i)
+
+    def del_thumnnail(self):
+        del self.list_thumbnail[randint(0, len(self.list_thumbnail)-1)]
+        for i in range(len(self.list_thumbnail)):
+            self.list_thumbnail[i].set_position(i)
+
+    def update_thumbnail(self):
+        tmp = []
+        for tn in self.list_thumbnail:
+            if tn.x < tn.target_x:
+                tn.x = min(tn.target_x, tn.x + Thumbnail.SPEED_X)
+            elif tn.x > tn.target_x:
+                tn.x = max(tn.target_x, tn.x - Thumbnail.SPEED_X)
+            if tn.y < tn.target_y:
+                tn.y = min(tn.target_y, tn.y + Thumbnail.SPEED_Y)
+            elif tn.y > tn.target_y:
+                tn.y = max(tn.target_y, tn.y - Thumbnail.SPEED_Y)
+            if tn.alpha < tn.target_alpha:
+                tn.alpha = min(tn.target_alpha, tn.alpha + Thumbnail.SPEED_ALPHA)
+            elif tn.alpha > tn.target_alpha:
+                tn.alpha = max(tn.target_alpha, tn.alpha - Thumbnail.SPEED_ALPHA)
+            if tn.last_time + Thumbnail.LIFE_TIME > time.time():
+                tmp.append(tn)
+        self.list_thumbnail = tmp
+        for i in range(len(self.list_thumbnail)):
+            self.list_thumbnail[i].set_position(i)
+
+    def draw(self):
+        self.screen = self.frame
+        # for tn in self.list_thumbnail:
+        #     self.screen = tn.draw_cv2(self.frame)
+        for bbox in self.list_bbox:
+            bbox.update()
+            self.screen = bbox.draw_cv2(self.frame, self.list_thumbnail)
+
+    def convert_jpeg(self):
+        ret, jpeg = cv2.imencode(".jpg", self.screen)
+        return jpeg.tobytes()
+
+    def run(self):
+        while self.running:
+            # try:
+            start_time = time.time()
+            if self.frame is not None:
+                self.update_thumbnail()
+                self.draw()
+                if self.display:    
+                    cv2.imshow('screen', self.screen)
+            if self.queue is not None and self.screen is not None:
+                self.queue.put(self.convert_jpeg())
+            elapsed_time = time.time() - start_time
+            # print(time.time() - start_time)
+            self.key = cv2.waitKey(1)
+            if self.key == 27:
+                self.running = False
+                break
+            if elapsed_time < 1./GraphicOpenCV.FPS:
+                time.sleep(1./GraphicOpenCV.FPS - elapsed_time)
+            # except Exception as e:
+            #     exc_type, exc_obj, exc_tb = sys.exc_info()
+            #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            #     print(exc_type, fname, exc_tb.tb_lineno)
+            #     self.running = False
+            #     break
+
 
 def run_video(graphic):
     cap = cv2.VideoCapture(0)

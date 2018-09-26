@@ -9,7 +9,7 @@ from object_DL import Person, Location, Image, Camera
 import logging
 
 class TrackingPerson:
-    def __init__(self, person, statistic, bounding_box, last_appearance, last_time_tried, tried, unk_images):
+    def __init__(self, person, statistic, bounding_box, last_appearance, last_time_tried, tried, unk_images, image=None):
         self.id = str(uuid.uuid4())
         self.person = person
         self.statistic = statistic
@@ -19,7 +19,7 @@ class TrackingPerson:
         self.unk_images = unk_images
         self.tried = tried
         self.receive = 0
-        self.image = None
+        self.image = image
     def set_image(self, image):
         self.image = image
     def update_all(self, person, statistic, bounding_box, last_appearance, last_time_tried, tried, unk_images):
@@ -36,6 +36,7 @@ class TrackingPerson:
         x, y, w, h = self.bounding_box
         im = frame[max(0, y):y+h, max(0, x):x+w]
         im = cv2.resize(im, (vision_config.SIZE_OF_INPUT_IMAGE, vision_config.SIZE_OF_INPUT_IMAGE))
+        self.image = im
         return im
 
 class MultiTracker:

@@ -9,7 +9,7 @@ import interface
 from interact_database_v2 import Database
 from object_DL import Camera
 from TrackingFace import MultiTracker
-from face_graphics import GraphicPyGame
+from face_graphics import GraphicPyGame, GraphicOpenCV
 from flask import Flask, Response
 import queue
 import pygame
@@ -17,9 +17,9 @@ import pygame
 RUNNING = True
 
 SHOW_GRAPHICS = True
-STREAM = False
+STREAM = True
 HOST = '127.0.0.1'
-PORT = 80
+PORT = 8080
 
 FLAG_TRAINING = False
 FLAG_TAKE_PHOTO = False
@@ -151,13 +151,25 @@ def sub_task(database, client, graphics=None):
         #     continue
         # if key == 32 and FLAG_TRAINING:
         #     FLAG_TAKE_PHOTO = True
+
+        # if SHOW_GRAPHICS:
+        #     if graphics.key is not None:
+        #         if graphics.key == pygame.K_SPACE and not FLAG_TRAINING and interface.STATUS == interface.STATUS_INACTIVE:
+        #             threading.Thread(target=interface.get_idCode, args=(database,)).start()
+        #             continue
+        #         if graphics.key == pygame.K_SPACE and FLAG_TRAINING:
+        #             FLAG_TAKE_PHOTO = True
+        
         if SHOW_GRAPHICS:
             if graphics.key is not None:
-                if graphics.key == pygame.K_SPACE and not FLAG_TRAINING and interface.STATUS == interface.STATUS_INACTIVE:
-                    threading.Thread(target=interface.get_idCode, args=(database,)).start()
+                if graphics.key == 32 and not FLAG_TRAINING and interface.STATUS == interface.STATUS_INACTIVE:
+                    threading.Thread(target=interface.get_idCode, args=(database,), daemon=True).start()
                     continue
-                if graphics.key == pygame.K_SPACE and FLAG_TRAINING:
+                if graphics.key == 32 and FLAG_TRAINING:
                     FLAG_TAKE_PHOTO = True
+                if graphics.key == 27:
+                    RUNNING = False
+                    exit(0)
     RUNNING = False
     cv2.destroyAllWindows()
 
@@ -188,8 +200,8 @@ def video_feed():
 
 def start_web():
     global app, HOST, PORT
-    threading.Thread(target=gen_frame, args=()).start()
-    threading.Thread(target=app.run, args=(HOST, PORT, False)).start()
+    threading.Thread(target=gen_frame, args=(), daemon=True).start()
+    threading.Thread(target=app.run, args=(HOST, PORT, False), daemon=True).start()
 
 def start(cam_id = None):
     global STREAM, SHOW_GRAPHICS
@@ -198,13 +210,16 @@ def start(cam_id = None):
     if cam_id is not None:
         cam = database.getCameraById(int(cam_id))
     client = service_client_demo.ClientService(database, cam)
-    if not SHOW_GRAPHICS:
+    if not SHOW_GRAPHICS and not STREAM:
         sub_task(database, client)
     else:
-        if not STREAM:
-            graphics = GraphicPyGame(vision_config.SCREEN_SIZE['width'], vision_config.SCREEN_SIZE['height'])
-        else:
-            graphics = GraphicPyGame(vision_config.SCREEN_SIZE['width'], vision_config.SCREEN_SIZE['height'], queue=q_FRAME)
+        if SHOW_GRAPHICS and not STREAM:
+            graphics = GraphicOpenCV(display=True, queue=None)
+        elif SHOW_GRAPHICS and STREAM:
+            graphics = GraphicOpenCV(display=True, queue=q_FRAME)
             start_web()
-        threading.Thread(target=sub_task, args=(database, client, graphics,), daemon= True).start()
+        elif not SHOW_GRAPHICS and STREAM:
+            graphics = GraphicOpenCV(display=False, queue=q_FRAME)
+            start_web()
+        threading.Thread(target=sub_task, args=(database, client, graphics,), daemon=True).start()
         graphics.run()
