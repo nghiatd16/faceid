@@ -125,24 +125,28 @@ class FaceDetectionService():
             self.RUNNING = False
 
     def guard_timeout_channel(self, timecheck=0.1):
-        while self.RUNNING:
-            for idx in range(vision_config.MAX_WORKER):
-                if self.worker_KEY[idx] is not None:
-                    num = self.r.execute_command('PUBSUB', 'NUMSUB', self.worker_CHANNEL[idx])[1]
-                    if num == 0:
-                        logging.info('WORKER:: {} - worker {} diconnected!'.format(self.worker_KEY[idx], idx))
-                        self.disconnet_channel_worker(idx)
-                        if self.client_KEY[idx] is not None:
-                            logging.info('CLIENT:: {} diconnected with worker {}'.format(self.client_KEY[idx], idx))
-                            self.disconnet_channel_client(idx)
+        try:
+            while self.RUNNING:
+                for idx in range(vision_config.MAX_WORKER):
+                    if self.worker_KEY[idx] is not None:
+                        num = self.r.execute_command('PUBSUB', 'NUMSUB', self.worker_CHANNEL[idx])[1]
+                        if num == 0:
+                            logging.info('WORKER:: {} - worker {} diconnected!'.format(self.worker_KEY[idx], idx))
+                            self.disconnet_channel_worker(idx)
+                            if self.client_KEY[idx] is not None:
+                                logging.info('CLIENT:: {} diconnected with worker {}'.format(self.client_KEY[idx], idx))
+                                self.disconnet_channel_client(idx)
 
-            for idx in range(vision_config.MAX_CLIENT):
-                if self.client_KEY[idx] is not None:
-                    num = self.r.execute_command('PUBSUB', 'NUMSUB', self.client_CHANNEL[idx])[1]
-                    if num == 0:
-                        logging.info('CLIENT:: {} - diconnected with worker {}'.format(self.client_KEY[idx], idx))
-                        self.disconnet_channel_client(idx)
-            time.sleep(timecheck)
+                for idx in range(vision_config.MAX_CLIENT):
+                    if self.client_KEY[idx] is not None:
+                        num = self.r.execute_command('PUBSUB', 'NUMSUB', self.client_CHANNEL[idx])[1]
+                        if num == 0:
+                            logging.info('CLIENT:: {} - diconnected with worker {}'.format(self.client_KEY[idx], idx))
+                            self.disconnet_channel_client(idx)
+                time.sleep(timecheck)
+        except Exception as e:
+            logging.error(str(e))
+            self.RUNNING = False
 
     def disconnet_channel_client(self, idx):
         self.client_KEY[idx] = None

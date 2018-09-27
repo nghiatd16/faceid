@@ -16,8 +16,8 @@ import pygame
 
 RUNNING = True
 
-SHOW_GRAPHICS = True
-STREAM = False
+SHOW_GRAPHICS = False
+STREAM = True
 HOST = '127.0.0.1'
 PORT = 8080
 
@@ -32,7 +32,7 @@ timer = time.time()
 train_timer = time.time()
 
 def sub_task(database, client, graphics=None):
-    global RUNNING, info_pack, SHOW_GRAPHICS, FLAG_TAKE_PHOTO, FLAG_TRAINING, timer, train_timer, time_take_photo, tim_elapsed, bbox_list_online, img_list_online
+    global RUNNING, info_pack, SHOW_GRAPHICS, STREAM, FLAG_TAKE_PHOTO, FLAG_TRAINING, timer, train_timer, time_take_photo, tim_elapsed, bbox_list_online, img_list_online
     client.subscribe_server()
     multi_tracker = MultiTracker()
     client.record()
@@ -124,6 +124,7 @@ def sub_task(database, client, graphics=None):
                             predicts = content
                         multi_tracker.update_identification([tracker], [predicts])
         if len(unidentified_tracker) > 0:
+<<<<<<< HEAD
             if vision_config.MANUAL_IDENTIFY == False:
                 for tracker in unidentified_tracker:
                     if tracker.person is None and tracker.tried < vision_config.NUM_TRIED and (time.time() - tracker.last_time_tried) >= vision_config.DELAY_TRIED:
@@ -133,6 +134,15 @@ def sub_task(database, client, graphics=None):
                         tracker.tried += 1
 
         if SHOW_GRAPHICS:
+=======
+            for tracker in unidentified_tracker:
+                if tracker.person is None and tracker.tried < vision_config.NUM_TRIED and (time.time() - tracker.last_time_tried) >= vision_config.DELAY_TRIED:
+                    face = tracker.get_bbox_image(img)
+                    client.request_identify_service(face, tracker.id, mode = vision_config.IDEN_MOD)
+                    tracker.last_time_tried = time.time()
+                    tracker.tried += 1
+        if SHOW_GRAPHICS or STREAM:
+>>>>>>> 44e29e4cf0ab4c02ceb31e17bc8ada88c5e42f53
             graphics.put_update(frame, multi_tracker)
             if not graphics.running:
                 client.stop_service()
@@ -162,7 +172,7 @@ def sub_task(database, client, graphics=None):
         #         if graphics.key == pygame.K_SPACE and FLAG_TRAINING:
         #             FLAG_TAKE_PHOTO = True
         
-        if SHOW_GRAPHICS:
+        if SHOW_GRAPHICS or STREAM:
             if graphics.key is not None:
                 if graphics.key == 32 and not FLAG_TRAINING and interface.STATUS == interface.STATUS_INACTIVE:
                     threading.Thread(target=interface.get_idCode, args=(database,), daemon=True).start()
@@ -208,8 +218,9 @@ def start_web():
     threading.Thread(target=gen_frame, args=(), daemon=True).start()
     threading.Thread(target=app.run, args=(HOST, PORT, False), daemon=True).start()
 
-def start(cam_id = None):
-    global STREAM, SHOW_GRAPHICS
+def start(cam_id = None, port=8888):
+    global STREAM, SHOW_GRAPHICS, PORT
+    PORT = port
     database = Database(vision_config.DB_HOST,vision_config.DB_USER,vision_config.DB_PASSWD, vision_config.DB_NAME)
     cam = None
     if cam_id is not None:
