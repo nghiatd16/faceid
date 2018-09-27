@@ -30,9 +30,9 @@ class ClientService:
         self.subscribe_object = self.detect_service_line.pubsub()
         if self.camera is not None:
             try:
-                self.capture = cv2.VideoCapture(camera.httpurl)
-            except:
                 self.capture = cv2.VideoCapture(camera.rstpurl)
+            except:
+                self.capture = cv2.VideoCapture(camera.httpurl)
                 pass
             logging.info("Video Capture device is camera ".format(camera))
         else:
@@ -122,7 +122,22 @@ class ClientService:
             bboxes = bboxes * vision_config.DETECT_SCALE
             # bboxes = np.matmul(bboxes, vision_config.DETECT_SCALE)
             ret = True
-        return (ret, bboxes)
+        if vision_config.BIGGEST_FACE == False:
+            return (ret, bboxes)
+        max_sq = -1
+        res = None
+        for bbox in bboxes:
+            x, y, w, h = bbox
+            x = int(x)
+            y = int(y)
+            w = int(w)
+            h = int(h)
+            if w*h > max_sq:
+                res = bbox
+                max_sq = w*h
+        if res is None:
+            return (False, [])
+        return (True, [res])
     
     def request_identify_service(self, face, tracker_id, mode, mode_push = "lpush"):
         if mode != vision_config.ENCODE_MOD and mode != vision_config.IDEN_MOD:

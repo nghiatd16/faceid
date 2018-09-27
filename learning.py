@@ -15,17 +15,19 @@ import manage_data
 def offline_learning(dataset_path):
     def extract_info_text(path):
         info = open(path, "r")
-        name, birthday, gender, idcode = info.readlines()
+        name, birthday, gender, idcode, country = info.readlines()
         name = name[:-1]
-        birthday = int(birthday[:-1])
+        birthday = manage_data.std_date_format(birthday[:-1])
         gender = gender[:-1]
+        idcode = idcode[:-1]
         info.close()
-        return (name, birthday, gender, idcode)
+        return (name, birthday, gender, idcode, country)
     database = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
     vision_object = Vision(database, mode="only_identify")
     cwd = os.getcwd()
     os.chdir(dataset_path)
-    
+    error_counter = 0
+    total_person = len(os.listdir())
     st = time.time()
     for folder in os.listdir():
         logging.info("Processing `{}`".format(os.path.abspath(folder)))
@@ -34,14 +36,14 @@ def offline_learning(dataset_path):
             list_img = []
             for file in os.listdir(person_folder):
                 file = os.path.join(person_folder, os.path.basename(file))
-                if file.endswith(".jpg") or file.endswith(".png") and os.path.basename(file) != "__avatar__.jpg":
+                if (file.endswith(".jpg") or file.endswith(".png")) and os.path.basename(file) != "__avatar__.jpg":
                     img = cv2.imread(file)
                     img = cv2.resize(img, (Vision.SIZE_OF_INPUT_IMAGE, Vision.SIZE_OF_INPUT_IMAGE))
                     list_img.append(img)
+                    print("Add an image : {}".format(os.path.abspath(file)))
             embedding_list = vision_object.encode_embeddings(list_img)
             embedding_vector = np.mean(embedding_list, axis=0)
-            embedding_vector = manage_data.convert_embedding_vector_to_bytes(embedding_vector)
-            name, birthday, gender, idcode = extract_info_text(os.path.join(folder, "__info__.txt"))
+            name, birthday, gender, idcode, country = extract_info_text(os.path.join(folder, "__info__.txt"))
             check_person = database.getPersonByIdCode(idcode)
             if check_person is not None:
                 logging.info("person {} is known. Proceed Transfer Learning!".format(check_person))
@@ -51,7 +53,7 @@ def offline_learning(dataset_path):
                 embedding_list = np.array(embedding_list)
                 embedding_vector = np.mean(embedding_list, axis=0)
                 embedding_vector = manage_data.convert_embedding_vector_to_bytes(embedding_vector)
-                database.updatePerson(Person(embedding=embedding_vector), learning_person)
+                database.updatePerson(Person(embedding=embedding_vector), check_person)
                 continue
             avatar_path = os.path.join(folder, "__avatar__.jpg")
             avatar = cv2.imread(avatar_path)
@@ -61,11 +63,13 @@ def offline_learning(dataset_path):
             face = cv2.imread(face_path)
             face = cv2.resize(face, (Vision.SIZE_OF_INPUT_IMAGE, Vision.SIZE_OF_INPUT_IMAGE))
             b64_face = manage_data.convert_image_to_b64(face)
-            person = Person(name= name, birthday= birthday, gender= gender, idcode= idcode, embedding= embedding_vector, b64face= b64_face, b64image= b64_img)
+            embedding_vector = manage_data.convert_embedding_vector_to_bytes(embedding_vector)
+            person = Person(name= name, birthday= birthday, gender= gender, idcode= idcode, country=country, embedding= embedding_vector, b64face= b64_face, b64image= b64_img)
             logging.info("New Learning a person {}".format(person))
             database.insertPerson(person)
         except Exception as e:
             logging.error(e)
+            error_counter += 1
             pass
     delta = time.time() - st
     elapsed = None
@@ -76,6 +80,7 @@ def offline_learning(dataset_path):
     else:
         elapsed = time.strftime("%H hours : %M minutes : %S seconds", time.gmtime(delta))
     logging.info("Training complete in: {}".format(elapsed))
+    logging.info("Successfull training : {}/{} person".format(total_person - error_counter, total_person))
     os.chdir(cwd)
         
             
@@ -128,6 +133,7 @@ def online_learning_service(bbox_faces, img_faces, client, info_pack, multiTrack
     embed_vector = np.mean(embedding_list, axis=0)
     embed_vector = np.array(embed_vector)
     learning_person = None
+    img_faces = add_data(img_faces)
     b64Face = manage_data.convert_image_to_b64(img_faces[0])
     b64Img = manage_data.convert_image_to_b64(img_faces[1])
     if msg == vision_config.NEW_LEARNING_MSG:

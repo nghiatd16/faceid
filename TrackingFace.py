@@ -66,22 +66,27 @@ class MultiTracker:
             num_del = 0 
             cur_time = time.time()
             for idx in range(len(self.__multiTracker)):
-                if cur_time - self.__multiTracker[idx-num_del].last_appearance >= 0.4:
+                if cur_time - self.__multiTracker[idx-num_del].last_appearance >= 0.35:
                     del self.__multiTracker[idx-num_del]
                     if vision_config.SHOW_LOG_TRACKING:
                         logging.warning('An object has been stopped tracking!')
                         logging.info('Number of tracker remainings: {}'.format(len(self.__multiTracker)))
                     num_del += 1
-                    
+        find_tracker = -1
         for bbox in bbox_faces:
             x, y, w, h = bbox
             find_tracker = self.has_tracker_control_object(bbox)
             if find_tracker == -1:
                 self.__multiTracker.append(TrackingPerson(None, {'Unknown': 1}, bbox, time.time(), time.time()-vision_config.DELAY_TRIED, 0, []))
+                find_tracker = len(self.__multiTracker)-1
             else:
                 tracker = self.__multiTracker[find_tracker]
                 tracker.update_bounding_box(bbox)
                 tracker.last_appearance = time.time()
+        if vision_config.BIGGEST_FACE and len(bbox_faces) > 0:
+                for idx, tracker in enumerate(self.__multiTracker):
+                    if idx != find_tracker:
+                        tracker.last_appearance -= 1
         for tracker in self.__multiTracker:
             if tracker.person is not None or tracker.receive >= vision_config.NUM_TRIED:
                 if tracker.person is not None and tracker.image is not None:

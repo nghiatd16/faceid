@@ -154,17 +154,19 @@ class BBox:
             color = GraphicPyGame.COLOR_WHITE
         elif self.person is None and not self.matching:
             color = GraphicPyGame.COLOR_RED
-            # info = GraphicPyGame.FONT_VIETNAMESE.render('Unknown', False, GraphicPyGame.COLOR_RED)
+            # info = GraphicOpenCV.FONT_VIETNAMESE.render('Unknown', False, GraphicPyGame.COLOR_RED)
+            info = "Unknown"
         elif self.person is not None:
             color = GraphicPyGame.COLOR_GREEN
-            # info = GraphicPyGame.FONT_VIETNAMESE.render('{} - {}'.format(self.person.name, self.person.idcode), False, GraphicPyGame.COLOR_WHITE)
+            info = '{} - {}'.format(self.person.name, self.person.idcode)
+            # info = GraphicOpenCV.FONT_VIETNAMESE.render('{} - {}'.format(self.person.name, self.person.idcode), False, GraphicPyGame.COLOR_WHITE)
             # for tn in list_thumbnail:
             #     if tn.person.id == self.person.id:
             #         cv2.line(frame, (self.x - self.thickness, self.y-self.thickness), (tn.x + Thumbnail.SIZE_X, tn.y), color, self.thickness)
             #         break
 
         thickness = self.thickness
-
+        
         x_min, y_min, w, h = (self.x, self.y, self.w, self.h)
         x_max = x_min + w
         y_max = y_min + h
@@ -189,6 +191,8 @@ class BBox:
         cv2.line(frame, (center_x, y_max - line_center_len), (center_x, y_max + line_center_len), color, thickness)
         cv2.line(frame, (x_min - line_center_len, center_y), (x_min + line_center_len, center_y), color, thickness)
         cv2.line(frame, (x_max - line_center_len, center_y), (x_max + line_center_len, center_y), color, thickness)
+
+        cv2.putText(frame, info , (x_min, y_max+12), cv2.FONT_HERSHEY_SIMPLEX, vision_config.FONT_SIZE, color, vision_config.LINE_THICKNESS,cv2.LINE_AA)
         return frame
 
 class GraphicPyGame:
@@ -373,7 +377,11 @@ class GraphicOpenCV:
     COLOR_GREEN = (40,190,80)
     COLOR_WHITE = (255,255,255)
     COLOR_RED = (190,40,40)
-
+    pygame.init()
+    FONT_VIETNAMESE = None
+    FONT_JAPANESE = None
+    FONT_VIETNAMESE = pygame.font.Font('font/Montserrat-Medium.otf', 100)
+    FONT_JAPANESE = pygame.font.Font('font/NotoSansMonoCJKjp-Regular.otf', 100)
     def __init__(self, display=True, queue=None):
         self.frame = None
         self.screen = None

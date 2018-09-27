@@ -17,7 +17,7 @@ import pygame
 RUNNING = True
 
 SHOW_GRAPHICS = True
-STREAM = True
+STREAM = False
 HOST = '127.0.0.1'
 PORT = 8080
 
@@ -114,7 +114,7 @@ def sub_task(database, client, graphics=None):
                 FLAG_TRAINING = False
                 time_take_photo = 2
         for idx, tracker in enumerate(trackers):
-            if tracker.person is None:
+            if tracker.person is None and vision_config.MANUAL_IDENTIFY == False:
                 mode, content = client.get_response_identify_service(tracker.id)
                 if mode is not None:
                     tracker.receive += 1
@@ -124,12 +124,14 @@ def sub_task(database, client, graphics=None):
                             predicts = content
                         multi_tracker.update_identification([tracker], [predicts])
         if len(unidentified_tracker) > 0:
-            for tracker in unidentified_tracker:
-                if tracker.person is None and tracker.tried < vision_config.NUM_TRIED and (time.time() - tracker.last_time_tried) >= vision_config.DELAY_TRIED:
-                    face = tracker.get_bbox_image(img)
-                    client.request_identify_service(face, tracker.id, mode = vision_config.IDEN_MOD)
-                    tracker.last_time_tried = time.time()
-                    tracker.tried += 1
+            if vision_config.MANUAL_IDENTIFY == False:
+                for tracker in unidentified_tracker:
+                    if tracker.person is None and tracker.tried < vision_config.NUM_TRIED and (time.time() - tracker.last_time_tried) >= vision_config.DELAY_TRIED:
+                        face = tracker.get_bbox_image(img)
+                        client.request_identify_service(face, tracker.id, mode = vision_config.IDEN_MOD)
+                        tracker.last_time_tried = time.time()
+                        tracker.tried += 1
+
         if SHOW_GRAPHICS:
             graphics.put_update(frame, multi_tracker)
             if not graphics.running:
@@ -170,6 +172,9 @@ def sub_task(database, client, graphics=None):
                 if graphics.key == 27:
                     RUNNING = False
                     exit(0)
+                if graphics.key == ord('a') and interface.showing_admin_review == False:
+                    interface.showing_admin_review = True
+                    threading.Thread(target=interface.identification_review, args=(database, multi_tracker,), daemon=True).start()
     RUNNING = False
     cv2.destroyAllWindows()
 

@@ -13,7 +13,8 @@ STATUS = STATUS_INACTIVE
 STATUS_CONFIRM = 3
 result = None
 msg_result = None
-
+msg_iden_review = None
+showing_admin_review = False
 db = None
 # db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
 def response_idCode_OK(idCode):
@@ -196,6 +197,57 @@ def get_information(idCode):
     # root.destroy()
 
 
+def identification_review(database=None, multi_tracker=None):
+    global msg_iden_review
+    root = Tk()
+    root.title("Identification Admin Review")
+    # root.geometry("500x50+100+100")
+    row = Frame(root)
+    width_box = 30
+    # notice = Label(row, text="Identification Admin Review", width=width_box, font=(16), anchor='w')
+    # notice.pack(side=TOP)
+    def call_ok(msg):
+        global msg_iden_review
+        # msg_iden_review = msg
+        # tracker = multi_tracker.get_multitracker()[0]
+        # person = database.getPersonByName(msg)
+        # tracker.person = person
+        print(msg)
+    def call_cancel(event=None):
+        global STATUS, showing_admin_review
+        STATUS = STATUS_INPROGRESS
+        showing_admin_review = False
+        root.destroy()
+    TIS_VIP = ["Toru Kuwano", "Kiyotaka Nakamura", "Hiromitsu Fujino", "Osamu Ishiguro", "Masahiro Mori", "Kensaku Furusho", "Dang Anh Trung"]
+    TV_VIP = ["Hoang To", "Nguyen Quan Son", "Nguyen Khanh Hoan", "Nguyen Son Tung", "Tham Duc Thang", "Nguyen Ich Vinh", "Pham Thuc Truong Luong"]
+    
+    #TIS VIP
+    Button(root, text="Mr.Toru Kuwano", width=30, height = 5, command=lambda: call_ok(TIS_VIP[0])).grid(row=0,column=0)
+    Button(root, text="Mr.Kiyotaka Nakamura", width=30, height = 5, command=lambda: call_ok(TIS_VIP[1])).grid(row=1,column=0)
+    Button(root, text="Mr.Hiromitsu Fujino", width=30, height = 5, command=lambda: call_ok(TIS_VIP[2])).grid(row=2,column=0)
+    Button(root, text="Mr.Osamu Ishiguro", width=30, height = 5, command=lambda: call_ok(TIS_VIP[3])).grid(row=3,column=0)
+    Button(root, text="Mr.Masahiro Mori", width=30, height = 5, command=lambda: call_ok(TIS_VIP[4])).grid(row=4,column=0)
+    Button(root, text="Mr.Kensaku Furusho", width=30, height = 5, command=lambda: call_ok(TIS_VIP[5])).grid(row=5,column=0)
+    Button(root, text="Mr.Dang Anh Trung", width=30, height = 5, command=lambda: call_ok(TIS_VIP[6])).grid(row=6,column=0)
+    
+    #TV_VIP
+    Button(root, text="Mr.Hoang To", width=30, height = 5, command=lambda: call_ok(TV_VIP[0])).grid(row=0,column=1)
+    Button(root, text="Mr.Nguyen Quan Son", width=30, height = 5, command=lambda: call_ok(TV_VIP[1])).grid(row=1,column=1)
+    Button(root, text="Mr.Nguyen Khanh Hoan", width=30, height = 5, command=lambda: call_ok(TV_VIP[2])).grid(row=2,column=1)
+    Button(root, text="Mr.Nguyen Son Tung", width=30, height = 5, command=lambda: call_ok(TV_VIP[3])).grid(row=3,column=1)
+    Button(root, text="Mr.Tham Duc Thang", width=30, height = 5, command=lambda: call_ok(TV_VIP[4])).grid(row=4,column=1)
+    Button(root, text="Mr.Nguyen Ich Vinh", width=30, height = 5, command=lambda: call_ok(TV_VIP[5])).grid(row=5,column=1)
+    Button(root, text="Mr.Pham Thuc Truong Luong", width=30, height = 5, command=lambda: call_ok(TV_VIP[6])).grid(row=6,column=1)
+
+    Label(root, text="Custom Name", width=30, font=(16), anchor='w').grid(row=7, column=0)
+    custom_txt = Entry(root, width=30, font=16)
+    custom_txt.grid(row=7, column=1)
+    btn_ok = Button(root, text="OK", width=30, height = 3, command=lambda: call_ok(custom_txt.get())).grid(row=8,column=1)
+    root.bind('<Return>', call_cancel)
+    root.bind('<Escape>', call_cancel)
+    center(root)
+    root.mainloop()
+
 def get_idCode(database):
     global STATUS, label, db
     db = database
@@ -223,7 +275,6 @@ def get_idCode(database):
         root.destroy()
         response_idCode_OK(idCode)
         
-
     def call_cancel(event=None):
         response_cancel()
         root.destroy()
@@ -237,5 +288,5 @@ def get_idCode(database):
     root.mainloop()
     # root.destroy()
 if __name__ =="__main__":
-    get_idCode(db)
+    identification_review()
 # layout_text()

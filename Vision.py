@@ -31,7 +31,7 @@ class Vision:
             config = tf.ConfigProto(gpu_options=gpu_options)
             self.__embedding_encoder = predictor.from_saved_model("exported_model", config=config)
             self.__database_empty = True
-            self.__classifier = KNeighborsClassifier(n_neighbors=5, algorithm='ball_tree', weights='distance')
+            self.__classifier = KNeighborsClassifier(n_neighbors=5, algorithm='ball_tree', metric=facenet.distance)
         if mode != 'only_identify':
             self.__pnet, self.__rnet, self.__onet = self.load_detect_face_model(device= vision_config.DETECT_DEVICE)
         if mode != 'only_detect':
@@ -47,10 +47,10 @@ class Vision:
     def update_new_database(self):
         if self.mode == 'only_detect':
             raise Exception("vision_object is on mode only_detect, doesn't support update database")
+        before = len(self.__label)
         self.__person, self.__feature, self.__label = self.__database.extract_features_labels()
         self.__database_empty = False
-        for l in self.__label:
-            print(l)
+        logging.info("Refetch database succesfull. Before-After refetch {} - {} person(s)".format(before, len(self.__label)))
         self.__classifier.fit(self.__feature, self.__label)
 
     @staticmethod
@@ -97,9 +97,8 @@ class Vision:
             y1 = int(bbox[3])
             x = int(bbox[0])
             y = int(bbox[1])
-            if (x1-x) > 0 and (y1-y) > 0:
-                faces.append((x, y, x1, y1))
-        faces = Vision.align_faces(faces, full_coordinate= True)
+            if (x1-x) > 0 and (y1-y) > 0 and x >= 0 and y >= 0:
+                faces.append((x, y, x1-x, y1-y))
         return faces
     
     def list_face_detector(self, list_frame):
@@ -133,7 +132,7 @@ class Vision:
     def encode_embeddings(self, img_list):
         if self.mode == 'only_detect':
             raise Exception('vision_object is on mode only_detect, cannot encode faces to embedding vectors')
-        images = facenet.load_data(img_list, False, False, Vision.SIZE_OF_INPUT_IMAGE)
+        images = facenet.load_images(img_list, Vision.SIZE_OF_INPUT_IMAGE)
         feed_dict = {"images": images, "phase": False}
         emb_array = self.__embedding_encoder(feed_dict)["embeddings"]
         return emb_array

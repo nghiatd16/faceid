@@ -160,7 +160,27 @@ class Database:
                 logging.exception("ERR in getPersons: {}".format(err))
                 return None
         return None
-
+    def getPersonByName(self, name):
+        if self.CONNECTED:
+            sql = "SELECT * FROM person WHERE name = '{}'".format(name)
+            try:
+                self.__mycursor.execute(sql)
+                rows = self.__mycursor.fetchall()
+                for row in rows:
+                    return object_DL.Person(id=row['idPerson'], 
+                                            name=row['name'],
+                                            birthday=row['birthday'], 
+                                            gender=row['gender'], 
+                                            idcode=row['idCode'],
+                                            country=row['country'],
+                                            embedding=row['embedding'], 
+                                            b64face=row['b64Face'], 
+                                            b64image=row['b64Image'])
+                return None
+            except mysql.connector.Error as err:
+                logging.exception("ERR in getPersonById: {}".format(err))
+                return None
+        return None
     def getPersonById(self, idPerson):
         if self.CONNECTED:
             sql = "SELECT * FROM person WHERE idPerson = {}".format(idPerson)
@@ -702,8 +722,9 @@ class Database:
         features = []
         labels = []
         for person in persons:
-            features.append(manage_data.convert_bytes_to_embedding_vector(person.embedding))
-            labels.append(person.id)
+            if person.embedding is not None:
+                features.append(manage_data.convert_bytes_to_embedding_vector(person.embedding))
+                labels.append(person.id)
         return (persons, features, labels)
 
 if __name__ == "__main__":
