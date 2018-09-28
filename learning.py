@@ -38,7 +38,13 @@ def offline_learning(dataset_path):
                 file = os.path.join(person_folder, os.path.basename(file))
                 if (file.endswith(".jpg") or file.endswith(".png")) and os.path.basename(file) != "__avatar__.jpg":
                     img = cv2.imread(file)
-                    img = cv2.resize(img, (Vision.SIZE_OF_INPUT_IMAGE, Vision.SIZE_OF_INPUT_IMAGE))
+                    try:
+                        img = cv2.resize(img, (Vision.SIZE_OF_INPUT_IMAGE, Vision.SIZE_OF_INPUT_IMAGE))
+                    except Exception as e:
+                        logging.info("{} - {}".format(file, img.shape))
+                        logging.error(e)
+                        error_counter += 1
+                        pass
                     list_img.append(img)
                     print("Add an image : {}".format(os.path.abspath(file)))
             embedding_list = vision_object.encode_embeddings(list_img)

@@ -56,6 +56,8 @@ class ClientService:
                     ret, frame = self.capture.read()
                     if ret and self.frame_queue.full():
                         self.frame_queue.get(timeout = 1)
+                    w, h, channel = frame.shape
+                    frame = cv2.resize(frame, (int(frame.shape[1]/vision_config.INPUT_SCALE), int(frame.shape[0]/vision_config.INPUT_SCALE)))
                     self.frame_queue.put(np.copy(frame), timeout = 1)
                 except:
                     pass
@@ -132,7 +134,7 @@ class ClientService:
             y = int(y)
             w = int(w)
             h = int(h)
-            if w*h > max_sq:
+            if w*h > max_sq and (w >= 160 and h >= 160):
                 res = bbox
                 max_sq = w*h
         if res is None:

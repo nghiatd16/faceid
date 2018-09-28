@@ -16,9 +16,9 @@ import pygame
 
 RUNNING = True
 
-SHOW_GRAPHICS = False
+SHOW_GRAPHICS = True
 STREAM = True
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 PORT = 8080
 
 FLAG_TRAINING = False
@@ -124,17 +124,6 @@ def sub_task(database, client, graphics=None):
                             predicts = content
                         multi_tracker.update_identification([tracker], [predicts])
         if len(unidentified_tracker) > 0:
-<<<<<<< HEAD
-            if vision_config.MANUAL_IDENTIFY == False:
-                for tracker in unidentified_tracker:
-                    if tracker.person is None and tracker.tried < vision_config.NUM_TRIED and (time.time() - tracker.last_time_tried) >= vision_config.DELAY_TRIED:
-                        face = tracker.get_bbox_image(img)
-                        client.request_identify_service(face, tracker.id, mode = vision_config.IDEN_MOD)
-                        tracker.last_time_tried = time.time()
-                        tracker.tried += 1
-
-        if SHOW_GRAPHICS:
-=======
             for tracker in unidentified_tracker:
                 if tracker.person is None and tracker.tried < vision_config.NUM_TRIED and (time.time() - tracker.last_time_tried) >= vision_config.DELAY_TRIED:
                     face = tracker.get_bbox_image(img)
@@ -142,7 +131,6 @@ def sub_task(database, client, graphics=None):
                     tracker.last_time_tried = time.time()
                     tracker.tried += 1
         if SHOW_GRAPHICS or STREAM:
->>>>>>> 44e29e4cf0ab4c02ceb31e17bc8ada88c5e42f53
             graphics.put_update(frame, multi_tracker)
             if not graphics.running:
                 client.stop_service()

@@ -14,8 +14,8 @@ from tensorflow.contrib import predictor
 import logging
                     
 class Vision:
-    __detect_face_minsize = 40
-    __detect_face_threshold = [ 0.6, 0.7, 0.7 ]
+    __detect_face_minsize = 100
+    __detect_face_threshold = [ 0.89, 0.89, 0.9 ]
     __detect_face_factor = 0.709
     SIZE_OF_INPUT_IMAGE = 160
 
@@ -27,8 +27,8 @@ class Vision:
             raise TypeError("You have to pass database with mode '{}'".format(mode))
         logging.info("An vision object has been created with mode `{}`".format(mode))
         if mode != 'only_detect':
-            gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.3)
-            config = tf.ConfigProto(gpu_options=gpu_options)
+            #gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.3)
+            config = tf.ConfigProto(); config.gpu_options.allow_growth = True
             self.__embedding_encoder = predictor.from_saved_model("exported_model", config=config)
             self.__database_empty = True
             self.__classifier = KNeighborsClassifier(n_neighbors=5, algorithm='ball_tree', metric=facenet.distance)
@@ -60,8 +60,8 @@ class Vision:
                 config = tf.ConfigProto(device_count = {'GPU': 0})
                 sess = tf.Session(config=config)
             else:
-                gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.3)
-                config = tf.ConfigProto(gpu_options=gpu_options)
+                #gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.3)
+                config = tf.ConfigProto(); config.gpu_options.allow_growth = True
                 sess = tf.Session(config= config)
             with sess.as_default():
                 pnet, rnet, onet = df.create_mtcnn(sess, None)
