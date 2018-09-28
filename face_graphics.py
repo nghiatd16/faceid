@@ -192,7 +192,8 @@ class BBox:
         cv2.line(frame, (x_min - line_center_len, center_y), (x_min + line_center_len, center_y), color, thickness)
         cv2.line(frame, (x_max - line_center_len, center_y), (x_max + line_center_len, center_y), color, thickness)
 
-        cv2.putText(frame, info , (x_min, y_max+12), cv2.FONT_HERSHEY_SIMPLEX, vision_config.FONT_SIZE, color, vision_config.LINE_THICKNESS,cv2.LINE_AA)
+        if vision_config.DEBUG_MOD == True:
+            cv2.putText(frame, info , (x_min, y_max+12), cv2.FONT_HERSHEY_SIMPLEX, vision_config.FONT_SIZE, color, vision_config.LINE_THICKNESS,cv2.LINE_AA)
         return frame
 
 class GraphicPyGame:

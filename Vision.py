@@ -14,8 +14,8 @@ from tensorflow.contrib import predictor
 import logging
                     
 class Vision:
-    __detect_face_minsize = 100
-    __detect_face_threshold = [ 0.89, 0.89, 0.9 ]
+    __detect_face_minsize = 50
+    __detect_face_threshold = [ 0.6, 0.6, 0.7 ]
     __detect_face_factor = 0.709
     SIZE_OF_INPUT_IMAGE = 160
 

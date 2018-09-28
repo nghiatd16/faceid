@@ -9,7 +9,7 @@ from object_DL import Person, Location, Image, Camera
 import logging
 
 class TrackingPerson:
-    def __init__(self, person, statistic, bounding_box, last_appearance, last_time_tried, tried, unk_images, image=None):
+    def __init__(self, person, statistic, bounding_box, last_appearance, last_time_tried, tried, unk_images):
         self.id = str(uuid.uuid4())
         self.person = person
         self.statistic = statistic
@@ -19,9 +19,12 @@ class TrackingPerson:
         self.unk_images = unk_images
         self.tried = tried
         self.receive = 0
-        self.image = image
-    def set_image(self, image):
-        self.image = image
+        self.image = []
+        self.unknown = False
+    def add_image(self, image):
+        self.image.append(image)
+        self.last_time_tried = time.time()
+        self.tried += 1
     def update_all(self, person, statistic, bounding_box, last_appearance, last_time_tried, tried, unk_images):
         self.person = person
         self.statistic = statistic
@@ -32,12 +35,28 @@ class TrackingPerson:
         self.unk_images = unk_images
     def update_bounding_box(self, bounding_box):
         self.bounding_box = bounding_box
-    def get_bbox_image(self, frame):
+    def get_bbox_image(self, frame, up_scale=1):
         x, y, w, h = self.bounding_box
+        x, y, w, h = x*up_scale, y*up_scale, w*up_scale, h*up_scale
         im = frame[max(0, y):y+h, max(0, x):x+w]
         im = cv2.resize(im, (vision_config.SIZE_OF_INPUT_IMAGE, vision_config.SIZE_OF_INPUT_IMAGE))
-        self.image = im
         return im
+    def update_identification(self, identity, database):
+        if identity != None:
+            if self.person != identity:
+                self.person = identity
+                image = self.image[self.receive]
+                b64_img = manage_data.convert_image_to_b64(image)
+                new_image = Image(None, self.person, Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
+                database.insertImage(new_image)
+        if self.person is None and not self.unknown and self.receive+1 >= vision_config.NUM_TRIED:
+            self.unknown = True
+            image = self.image[self.receive]
+            b64_img = manage_data.convert_image_to_b64(image)
+            new_image = Image(None, Person(id=-1), Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
+            database.insertImage(new_image)
+        self.image[self.receive] = None
+        self.receive += 1
 
 class MultiTracker:
     def __init__(self, multiTracker = []):
@@ -87,18 +106,18 @@ class MultiTracker:
                 for idx, tracker in enumerate(self.__multiTracker):
                     if idx != find_tracker:
                         tracker.last_appearance -= 1
-        for tracker in self.__multiTracker:
-            if tracker.person is not None or tracker.receive >= vision_config.NUM_TRIED:
-                if tracker.person is not None and tracker.image is not None:
-                    b64_img = manage_data.convert_image_to_b64(tracker.image)
-                    new_image = Image(None, tracker.person, Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
-                    database.insertImage(new_image)
-                    tracker.image = None
-                elif tracker.image is not None:
-                    b64_img = manage_data.convert_image_to_b64(tracker.image)
-                    tracker.image = None
-                    new_image = Image(None, Person(id=-1), Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
-                    database.insertImage(new_image)
+#         for tracker in self.__multiTracker:
+#             if tracker.person is not None or tracker.receive >= vision_config.NUM_TRIED:
+#                 if tracker.person is not None and tracker.image is not None:
+#                     b64_img = manage_data.convert_image_to_b64(tracker.image)
+#                     new_image = Image(None, tracker.person, Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
+#                     database.insertImage(new_image)
+#                     tracker.image = None
+#                 elif tracker.image is not None:
+#                     b64_img = manage_data.convert_image_to_b64(tracker.image)
+#                     tracker.image = None
+#                     new_image = Image(None, Person(id=-1), Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
+#                     database.insertImage(new_image)
         control_tracking_object(self)
 
     def update_identification(self, tracker_lst, prediction, img_list=None):

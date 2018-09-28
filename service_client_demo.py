@@ -57,7 +57,7 @@ class ClientService:
                     if ret and self.frame_queue.full():
                         self.frame_queue.get(timeout = 1)
                     w, h, channel = frame.shape
-                    frame = cv2.resize(frame, (int(frame.shape[1]/vision_config.INPUT_SCALE), int(frame.shape[0]/vision_config.INPUT_SCALE)))
+#                     frame = cv2.resize(frame, (int(frame.shape[1]/vision_config.INPUT_SCALE), int(frame.shape[0]/vision_config.INPUT_SCALE)))
                     self.frame_queue.put(np.copy(frame), timeout = 1)
                 except:
                     pass
@@ -110,7 +110,7 @@ class ClientService:
         self.detect_service_line.ltrim(IN, 0, 0)
         self.detect_service_line.lpush(IN, bytebuf)
 
-    def get_response_detect_service(self, real_time = False):
+    def get_response_detect_service(self, upscale=1, real_time = False):
         OUT = self.subscribed_server_info["OUT"]
         while not self.detect_service_line.exists(OUT):
             time.sleep(0.001)
@@ -130,13 +130,15 @@ class ClientService:
         res = None
         for bbox in bboxes:
             x, y, w, h = bbox
-            x = int(x)
-            y = int(y)
-            w = int(w)
-            h = int(h)
-            if w*h > max_sq and (w >= 160 and h >= 160):
+            x = int(x*upscale)
+            y = int(y*upscale)
+            w = int(w*upscale)
+            h = int(h*upscale)
+            left_bound = int(vision_config.SCREEN_SIZE['width']/2 - vision_config.SCREEN_SIZE['height']/2)
+            right_bound = int(vision_config.SCREEN_SIZE['width']/2 + vision_config.SCREEN_SIZE['height']/2)
+            if max(w,h)**2 > max_sq and max(w,h) >= 160 and left_bound <= x and x+w <= right_bound:
                 res = bbox
-                max_sq = w*h
+                max_sq = max(w,h)**2
         if res is None:
             return (False, [])
         return (True, [res])

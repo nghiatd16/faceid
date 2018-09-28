@@ -16,7 +16,7 @@ import pygame
 
 RUNNING = True
 
-SHOW_GRAPHICS = True
+SHOW_GRAPHICS = False
 STREAM = True
 HOST = '0.0.0.0'
 PORT = 8080
@@ -38,15 +38,16 @@ def sub_task(database, client, graphics=None):
     client.record()
     train_area = vision_config.TRAINING_AREA
     while client.is_running():
-        frame = client.get_frame_from_queue()
-        if frame is None:
+        raw_frame = client.get_frame_from_queue()
+        if raw_frame is None:
             time.sleep(0.001)
             continue
+        frame = cv2.resize(raw_frame, (int(raw_frame.shape[1]/vision_config.INPUT_SCALE), int(raw_frame.shape[0]/vision_config.INPUT_SCALE)))
         img = frame.copy()
         fps = int(1./(time.time() - timer + 0.000001))
         timer = time.time()
         client.request_detect_service(frame)
-        ret, bboxes = client.get_response_detect_service(real_time=False)
+        ret, bboxes = client.get_response_detect_service(upscale=vision_config.INPUT_SCALE, real_time=False)
         multi_tracker.update_bounding_box(bboxes, database)
         unidentified_tracker, identified_tracker = multi_tracker.cluster_trackers()
         trackers = multi_tracker.get_multitracker()
@@ -117,19 +118,18 @@ def sub_task(database, client, graphics=None):
             if tracker.person is None and vision_config.MANUAL_IDENTIFY == False:
                 mode, content = client.get_response_identify_service(tracker.id)
                 if mode is not None:
-                    tracker.receive += 1
                     if mode == vision_config.IDEN_MOD:
                         predicts = None
                         if content != -1:
                             predicts = content
-                        multi_tracker.update_identification([tracker], [predicts])
+                        # multi_tracker.update_identification([tracker], [predicts])
+                        tracker.update_identification(predicts, database)
         if len(unidentified_tracker) > 0:
             for tracker in unidentified_tracker:
                 if tracker.person is None and tracker.tried < vision_config.NUM_TRIED and (time.time() - tracker.last_time_tried) >= vision_config.DELAY_TRIED:
-                    face = tracker.get_bbox_image(img)
+                    face = tracker.get_bbox_image(raw_frame, up_scale=vision_config.INPUT_SCALE)
                     client.request_identify_service(face, tracker.id, mode = vision_config.IDEN_MOD)
-                    tracker.last_time_tried = time.time()
-                    tracker.tried += 1
+                    tracker.add_image(face)
         if SHOW_GRAPHICS or STREAM:
             graphics.put_update(frame, multi_tracker)
             if not graphics.running:
