@@ -15,7 +15,7 @@ import logging
 class FaceIdentifyService:
     def __init__(self):
         self.key = vision_config.IDENTIFY_QUEUE
-        self.rd = redis.StrictRedis(host='localhost', port=6379)
+        self.rd = redis.StrictRedis(host=vision_config.REDIS_HOST, port=vision_config.REDIS_PORT)
         self.rd.delete(self.key)
         try:
             database = Database(host=vision_config.DB_HOST, \

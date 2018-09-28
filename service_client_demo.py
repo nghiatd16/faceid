@@ -25,8 +25,8 @@ class ClientService:
         self.capture = None
         self.subscribed_server_info = {}
         self.cid = str(uuid.uuid4())
-        self.detect_service_line = redis.StrictRedis(host='localhost', port=6379)
-        self.identify_service_line = redis.StrictRedis(host='localhost', port=6379)
+        self.detect_service_line = redis.StrictRedis(host=vision_config.REDIS_HOST, port=vision_config.REDIS_PORT)
+        self.identify_service_line = redis.StrictRedis(host=vision_config.REDIS_HOST, port=vision_config.REDIS_PORT)
         self.subscribe_object = self.detect_service_line.pubsub()
         if self.camera is not None:
             try:

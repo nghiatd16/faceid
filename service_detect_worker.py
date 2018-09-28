@@ -22,7 +22,7 @@ class FaceDetectionWorker:
         self.reg = vision_config.SERVICE_REGISTER_WORKER
         self.idworker = str(uuid.uuid4())
         logging.info('Worker:: {}'.format(self.idworker))
-        self.rd = redis.StrictRedis(host='localhost', port=6379)
+        self.rd = redis.StrictRedis(host=vision_config.REDIS_HOST, port=vision_config.REDIS_PORT)
         self.ps = self.rd.pubsub()
 
     def register_work_service(self):
