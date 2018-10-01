@@ -45,13 +45,17 @@ class Vision:
         return self.mode
     
     def update_new_database(self):
-        if self.mode == 'only_detect':
-            raise Exception("vision_object is on mode only_detect, doesn't support update database")
-        before = len(self.__label)
-        self.__person, self.__feature, self.__label = self.__database.extract_features_labels()
-        self.__database_empty = False
-        logging.info("Refetch database succesfull. Before-After refetch {} - {} person(s)".format(before, len(self.__label)))
-        self.__classifier.fit(self.__feature, self.__label)
+        try:
+            if self.mode == 'only_detect':
+                raise Exception("vision_object is on mode only_detect, doesn't support update database")
+            before = len(self.__label)
+            self.__person, self.__feature, self.__label = self.__database.extract_features_labels()
+            self.__database_empty = False
+            logging.info("Refetch database succesfull. Before-After refetch {} - {} person(s)".format(before, len(self.__label)))
+            self.__classifier.fit(self.__feature, self.__label)
+        except:
+            logging.error("Something went wrong when refetch database")
+            pass
 
     @staticmethod
     def load_detect_face_model(device = 'auto'):

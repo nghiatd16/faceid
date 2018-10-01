@@ -49,7 +49,7 @@ SCREEN_SIZE = {
 TRAINING_AREA = (320-128, 0, 320+128, 480)
 PADDING = 5
 SHOW_LOG_PREDICTION = True
-SHOW_LOG_TRACKING = True
+SHOW_LOG_TRACKING = False
 DEBUG_MOD = False
 # Some necessary funtion
 def set_screen_size(w, h):

@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import filedialog
 import _thread
 import time
 import vision_config
@@ -6,6 +7,7 @@ import logging
 import manage_data
 from interact_database_v2 import Database
 from object_DL import Person
+from PIL import Image, ImageTk
 STATUS_INACTIVE = 0
 STATUS_INPROGRESS = 1
 STATUS_DONE = 2
@@ -60,38 +62,54 @@ def center(win):
     win.deiconify()
 
 def show_information(msg, person):
+    global STATUS
     name = person.name
     idCode = person.idcode
     birthday = person.birthday
     gender = person.gender
     country = person.country
-    global STATUS
+    description = person.description
+    b64img = person.b64image
     STATUS = STATUS_CONFIRM
     label = None
-    root = Tk()
+    root = None
+    if msg == vision_config.TRANSFER_LEARNING_MSG:
+        root = Tk()
+    else:
+        root = Toplevel()
     root.title("Information")
     # root.geometry("500x50+100+100")
-    row = Frame(root)
+    # row = Frame(root)
     width_box = int(len(name)) + 15
-    notice = Label(row, text=msg, width=width_box, font=(16), anchor='w')
+    
+    im = Image.open("assets/unk_avt.jpg")
+    if b64img is not None:
+        img_ar = manage_data.convert_b64_to_image(b64img, to_rgb=True)
+        im = Image.fromarray(img_ar)
+    tkimage = ImageTk.PhotoImage(im)
+    avt = Label(root, image=tkimage)
+    avt.pack(side=TOP)
+    notice = Label(root, text=msg, width=width_box, font=(16), anchor='w')
     notice.pack(side=TOP)
-
-    idCode_lb = Label(row, text="ID Code: {}".format(idCode), width=width_box, font=(16), anchor='w')
+    idCode_lb = Label(root, text="ID Code: {}".format(idCode), width=width_box, font=(16), anchor='w')
     idCode_lb.pack(side=TOP)
 
-    name_lb = Label(row, text="Full Name: {}".format(name), width=width_box, font=(16), anchor="w")
+    name_lb = Label(root, text="Full Name: {}".format(name), width=width_box, font=(16), anchor="w")
     name_lb.pack(side = TOP)
     
-    birthday_lb = Label(row, text="Birthday: {}".format(manage_data.convert_date_format(birthday)), width=width_box, font=(16), anchor="w")
+    birthday_lb = Label(root, text="Birthday: {}".format(manage_data.convert_date_format(birthday)), width=width_box, font=(16), anchor="w")
     birthday_lb.pack(side = TOP)
 
-    gender_lb = Label(row, text="Gender: {}".format(gender), width=width_box, font=(16), anchor="w")
+    gender_lb = Label(root, text="Gender: {}".format(gender), width=width_box, font=(16), anchor="w")
     gender_lb.pack(side = TOP)
 
-    country_lb = Label(row, text="Country: {}".format(country), width=width_box, font=(16), anchor="w")
+    country_lb = Label(root, text="Country: {}".format(country), width=width_box, font=(16), anchor="w")
     country_lb.pack(side = TOP)
 
-    row.pack(side=TOP, fill=X, padx=5, pady=5)
+    des_lb = Label(root, text="Description: {}".format(description), width=width_box, font=(16), anchor="w")
+    des_lb.pack(side = TOP)
+
+    # root.pack(side=TOP, fill=X, padx=5, pady=5)
     check = 0
 
     def call_ok(event=None):
@@ -119,38 +137,48 @@ def get_information(idCode):
     root = Tk()
     root.title("New Person")
     # root.geometry("500x50+100+100")
-    row = Frame(root)
-    idCode_lb = Label(row, text="ID Code: {}".format(idCode), width=min(max(10 + len(str(idCode)), 25), 50), font=(16), anchor='w')
+    # row = Frame(root)
+    width = min(max(10 + len(str(idCode)), 25), 50)
+    idCode_lb = Label(root, text="ID Code: {}".format(idCode), width=width, font=(16), anchor='w')
     # e1.grid(row=0, column = 1)
-    
-    idCode_lb.pack(side=TOP)
+    idCode_lb.grid(row=0, column=0)
+    avt_path = Label(root, text="")
+    im = Image.open("assets/unk_avt.jpg")
+    tkimage = ImageTk.PhotoImage(im)
+    # Label(root, text = "Mori").grid(row = 0, column=0)
+    avt = Label(root, image=tkimage)
+    avt.grid(row = 0, column=1)
+    name_lb = Label(root, text="Full Name", width=width, font=(16), anchor="w")
+    name_lb.grid(row=2, column=0)
 
-    name_lb = Label(row, text="Full Name", width=12, font=(16), anchor="w")
-    name_lb.pack(side = TOP)
-
-    name_txt = Entry(row, width=18, font=16)
-    name_txt.pack(side=TOP, expand=YES, fill=X)
+    name_txt = Entry(root, width=width, font=16)
+    name_txt.grid(row=2, column=1)
     name_txt.focus_set()
 
-    birthday_lb = Label(row, text="Birthday", width=12, font=(16), anchor="w")
-    birthday_lb.pack(side = TOP)
+    birthday_lb = Label(root, text="Date of Birth", width=width, font=(16), anchor="w")
+    birthday_lb.grid(row=3, column=0)
 
-    birthday_txt = Entry(row, width=18, font=16)
-    birthday_txt.pack(side=TOP, expand=YES, fill=X)
+    birthday_txt = Entry(root, width=width, font=16)
+    birthday_txt.grid(row=3, column=1)
 
-    gender_lb = Label(row, text="Gender", width=12, font=(16), anchor="w")
-    gender_lb.pack(side = TOP)
+    gender_lb = Label(root, text="Gender", width=width, font=(16), anchor="w")
+    gender_lb.grid(row=4, column=0)
 
-    gender_txt = Entry(row, width=18, font=16)
-    gender_txt.pack(side=TOP, expand=YES, fill=X)
+    gender_txt = Entry(root, width=width, font=16)
+    gender_txt.grid(row=4, column=1)
 
-    country_lb = Label(row, text="Country", width=12, font=(16), anchor="w")
-    country_lb.pack(side = TOP)
+    country_lb = Label(root, text="Country", width=width, font=(16), anchor="w")
+    country_lb.grid(row=5, column=0)
 
-    country_txt = Entry(row, width=18, font=16)
-    country_txt.pack(side=TOP, expand=YES, fill=X)
+    country_txt = Entry(root, width=width, font=16)
+    country_txt.grid(row=5, column=1)
+
+    des_lb = Label(root, text="Description", width=width, font=(16), anchor="w")
+    des_lb.grid(row=6, column=0)
     
-    row.pack(side=TOP, fill=X, padx=5, pady=5)
+    des_txt = Entry(root, width=width, font=16)
+    des_txt.grid(row=6, column=1)
+    
     check = 0
 
     def call_ok(event=None):
@@ -169,10 +197,17 @@ def get_information(idCode):
         if len(country_txt.get()) == 0:
             country_txt.focus_set()
             return
+        if len(des_txt.get()) == 0:
+            des_txt.focus_set()
+            return
         birthday = manage_data.std_date_format(birthday_txt.get())
         if birthday == "-1":
             return
-        new_person = Person(name=name_txt.get(), birthday= birthday, gender=gender_txt.get(), idcode=idCode, country=country_txt.get())
+        b64img = None
+        path = avt_path.cget("text")
+        if path != "":
+            b64img = manage_data.load_b64_img(path)
+        new_person = Person(name=name_txt.get(), birthday= birthday, gender=gender_txt.get(), idcode=idCode, country=country_txt.get(), description=des_txt.get(), b64image=b64img)
         # root.quit()
         show_information(vision_config.NEW_LEARNING_MSG, new_person)
         if STATUS == STATUS_DONE:
@@ -186,10 +221,27 @@ def get_information(idCode):
             return
         response_cancel()
         root.destroy()
-    btn_ok = Button(root, text="OK", width=10, command=call_ok)
-    btn_ok.pack(side=LEFT, padx=5, pady=5)
+    def browsefunc(avt):
+        try:
+            path = filedialog.askopenfilename()
+            img = Image.open(path)
+            img = img.resize((150, 150))
+            photo=ImageTk.PhotoImage(img)
+            avt.configure(image=photo)
+            avt.image = photo
+            avt_path.configure(text=path)
+        except Exception as e:
+            logging.exception(e)
+            avt_path.configure(text="")
+            pass
+
+    btn_browse = Button(root, text="Browse", command=lambda: browsefunc(avt), anchor="w")
+    btn_browse.grid(row=1, column=1)
+    btn_ok = Button(root, text="OK", width=10, command=call_ok, anchor="w")
+    btn_ok.grid(row=7, column=0)
     btn_cancel = Button(root, text="Cancel", width=10, command=call_cancel)
-    btn_cancel.pack(side=RIGHT, padx=5, pady=5)
+    btn_cancel.grid(row=7, column=1)
+    # row.grid()
     root.bind('<Return>', call_ok)
     root.bind('<Escape>', call_cancel)
     center(root)
@@ -288,5 +340,6 @@ def get_idCode(database):
     root.mainloop()
     # root.destroy()
 if __name__ =="__main__":
-    identification_review()
+    db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
+    get_idCode(db)
 # layout_text()

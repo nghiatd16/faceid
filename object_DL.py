@@ -97,7 +97,7 @@ class Location:
     def __str__(self):
         return "[id: {} - longtitude: {} - latitude: {} - location: {}]".format(self.id, self.longtitude, self.latitude, self.location)
 class Person:
-    def __init__(self, id=None, name=None, birthday=None, gender=None, idcode=None, country=None, embedding=None, b64face=None, b64image=None):
+    def __init__(self, id=None, name=None, birthday=None, gender=None, idcode=None, country=None, description=None, embedding=None, b64face=None, b64image=None):
         self.id = id
         self.name = name
         self.unicodeName = None
@@ -105,7 +105,7 @@ class Person:
         self.gender = gender
         self.idcode = idcode
         self.country = country
-        self.description = None
+        self.description = description
         self.embedding = embedding
         self.b64face = b64face
         self.b64image = b64image

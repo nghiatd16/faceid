@@ -16,8 +16,8 @@ import pygame
 
 RUNNING = True
 
-SHOW_GRAPHICS = False
-STREAM = True
+SHOW_GRAPHICS = True
+STREAM = False
 HOST = '0.0.0.0'
 PORT = 8080
 
@@ -59,8 +59,12 @@ def sub_task(database, client, graphics=None):
             gender = person.gender
             idCode = person.idcode
             country = person.country
-            idCam = 1
-            info_pack = (interface.msg_result, name, birthday, gender, idCode, country, idCam)
+            description = person.description
+            b64img = person.b64image
+            idCam = 0
+            if client.camera is not None:
+                idCam = client.camera.id
+            info_pack = (interface.msg_result, name, birthday, gender, idCode, country, description, b64img, idCam)
             interface.reset()
         if FLAG_TRAINING:
             if time_take_photo > 0.2:
@@ -105,8 +109,8 @@ def sub_task(database, client, graphics=None):
                 # learning.online_learning(bbox_list_online, img_list_online, \
                 #                                     info_pack, vision_object, multi_tracker, database)
                 embed_list = client.request_embed_faces(img_list_online)
-                msg, name, birthday, gender, idCode, country, idCam = info_pack
-                pass_pack = (msg, name, birthday, gender, idCode, country, idCam, embed_list)
+                msg, name, birthday, gender, idCode, country, description, b64img, idCam = info_pack
+                pass_pack = (msg, name, birthday, gender, idCode, country, description, b64img, idCam, embed_list)
                 learning.online_learning_service(bbox_list_online, img_list_online, client,\
                                                 pass_pack, multi_tracker, database)
                 info_pack = None

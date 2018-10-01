@@ -65,9 +65,11 @@ def convert_image_to_b64(image):
     img_b64 = base64.b64encode(img_bytes)
     return img_b64
     
-def convert_b64_to_image(b64_str):
+def convert_b64_to_image(b64_str, to_rgb = False):
     img_b64 = base64.b64decode(b64_str)
-    image = cv2.imdecode(img_b64)
+    image = cv2.imdecode(np.frombuffer(img_b64, dtype=np.uint8), cv2.IMREAD_COLOR)
+    if to_rgb:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return image
     
 def convert_embedding_vector_to_bytes(embedding_vector):
@@ -76,3 +78,9 @@ def convert_embedding_vector_to_bytes(embedding_vector):
     
 def convert_bytes_to_embedding_vector(bytes):
     return np.frombuffer(bytes, dtype=np.float32)
+
+def load_b64_img(avt_path):
+    assert os.path.isfile(avt_path) == True
+    img = cv2.imread(avt_path)
+    img = cv2.resize(img, (200,200))
+    return convert_image_to_b64(img)

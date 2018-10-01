@@ -151,6 +151,7 @@ class Database:
                                             gender=row['gender'], 
                                             idcode=row['idCode'],
                                             country=row['country'],
+                                            description=row['description'],
                                             embedding=row['embedding'], 
                                             b64face=row['b64Face'], 
                                             b64image=row['b64Image'])
@@ -173,6 +174,7 @@ class Database:
                                             gender=row['gender'], 
                                             idcode=row['idCode'],
                                             country=row['country'],
+                                            description=row['description'],
                                             embedding=row['embedding'], 
                                             b64face=row['b64Face'], 
                                             b64image=row['b64Image'])
@@ -194,6 +196,7 @@ class Database:
                                             gender=row['gender'], 
                                             idcode=row['idCode'],
                                             country=row['country'],
+                                            description=row['description'],
                                             embedding=row['embedding'], 
                                             b64face=row['b64Face'], 
                                             b64image=row['b64Image'])
@@ -218,6 +221,7 @@ class Database:
                                             gender=row['gender'], 
                                             idcode=row['idCode'],
                                             country=row['country'],
+                                            description=row['description'],
                                             embedding=row['embedding'], 
                                             b64face=row['b64Face'], 
                                             b64image=row['b64Image'])

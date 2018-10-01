@@ -132,7 +132,7 @@ def online_learning(bbox_faces, img_faces, info_pack, vision_object, multiTracke
 def online_learning_service(bbox_faces, img_faces, client, info_pack, multiTracker, database):
     if len(img_faces) == 0:
         return
-    msg, name, birthday, gender, idCode, country, idCam, embedding_list = info_pack
+    msg, name, birthday, gender, idCode, country, description, b64Img, idCam, embedding_list = info_pack
     # manage_data.save_img(img_faces, name)
     # new_thumb = cv2.resize(img_faces[0], (50,50))
     
@@ -141,10 +141,12 @@ def online_learning_service(bbox_faces, img_faces, client, info_pack, multiTrack
     learning_person = None
     img_faces = add_data(img_faces)
     b64Face = manage_data.convert_image_to_b64(img_faces[0])
-    b64Img = manage_data.convert_image_to_b64(img_faces[1])
+    if b64Img is None:
+        # min(1, len(img_faces)-1) : avoid bug when len(img_faces) == 1
+        b64Img = manage_data.convert_image_to_b64(img_faces[min(1, len(img_faces)-1)])
     if msg == vision_config.NEW_LEARNING_MSG:
         embed_vector = manage_data.convert_embedding_vector_to_bytes(embed_vector)
-        learning_person = Person(None, name, birthday, gender, idCode, country, embed_vector, b64Face,  b64Img)
+        learning_person = Person(None, name, birthday, gender, idCode, country, description, embed_vector, b64Face,  b64Img)
         learning_person = database.insertPerson(learning_person)
     elif msg == vision_config.TRANSFER_LEARNING_MSG:
         learning_person = database.getPersonByIdCode(idCode)
@@ -161,7 +163,7 @@ def online_learning_service(bbox_faces, img_faces, client, info_pack, multiTrack
     new_image = Image(None, learning_person, cam, time_cap, b64Img, b64Face, embed_vector, True)
     database.insertImage(new_image)
     client.send_refetch_db_signal()
-    time.sleep(0.5)
+    time.sleep(0.6)
     # vision_object.update_new_database(database)
     multiTracker.remove_tracker(bbox_faces)
 
