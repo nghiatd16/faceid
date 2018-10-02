@@ -237,7 +237,7 @@ def get_information(idCode):
 
     btn_browse = Button(root, text="Browse", command=lambda: browsefunc(avt), anchor="w")
     btn_browse.grid(row=1, column=1)
-    btn_ok = Button(root, text="OK", width=10, command=call_ok, anchor="w")
+    btn_ok = Button(root, text="OK", width=10, command=call_ok)
     btn_ok.grid(row=7, column=0)
     btn_cancel = Button(root, text="Cancel", width=10, command=call_cancel)
     btn_cancel.grid(row=7, column=1)

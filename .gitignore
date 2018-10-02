@@ -12,7 +12,6 @@ convert_meta_data.py
 test.py
 *.jpg/
 test_cam.py
-assets/
 freeze_graph.py
 gen_code_interface.py
 test_cam.py
