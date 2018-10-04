@@ -12,7 +12,8 @@ from TrackingFace import MultiTracker
 from interact_database_v2 import Database
 from object_DL import Person, Camera, Location, Image
 import logging
-
+#This import is only for serving demo TIS
+import interface
 class ClientService:
     class FLAG:
         def __init__(self):
@@ -201,7 +202,35 @@ class ClientService:
         except:
             return None
         return frame
-
+    def __sub_task_admin_reviewer(self, multi_tracker, database):
+        #This function is only for serving demo TIS
+        logging.info("Admin Reviewer is ready")
+        while True:
+            try:
+                if interface.msg_admin_reviewer is not None:
+                    if interface.msg_admin_reviewer.id == -1:
+                        multi_tracker.get_multitracker().clear()
+                        interface.msg_admin_reviewer = None
+                        continue
+                    tracker = multi_tracker.get_multitracker()[0]
+                    tracker.judgement = interface.msg_admin_reviewer
+                    tracker.person = interface.msg_admin_reviewer
+                    interface.msg_admin_reviewer = None
+                    image = tracker.image[-1]
+                    b64_img = manage_data.convert_image_to_b64(image)
+                    new_image = Image(None, tracker.person, Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
+                    database.insertImage(new_image)
+            except Exception as e:
+                logging.info("{}".format(e))
+                pass
+            time.sleep(0.1)
+    def admin_reviewer(self, multi_tracker, database):
+        #This function is only for serving demo TIS
+        if vision_config.BIGGEST_FACE == False:
+            logging.exception("Admin Reviewer function only available on `BIGGEST_FACE` mode. Please setting vision_config")
+            return
+        threading.Thread(target=self.__sub_task_admin_reviewer, args=(multi_tracker, database,), daemon=True).start()
+        
     @staticmethod
     def face_in_training_area(frame, bbox_faces, training_area):
         x, y, b_w, b_h = training_area

@@ -21,6 +21,8 @@ class TrackingPerson:
         self.receive = 0
         self.image = []
         self.unknown = False
+        # This attribute is only for serving demo TVLAB
+        self.judgement = None
     def add_image(self, image):
         self.image.append(image)
         self.last_time_tried = time.time()
@@ -55,7 +57,8 @@ class TrackingPerson:
             b64_img = manage_data.convert_image_to_b64(image)
             new_image = Image(None, Person(id=-1), Camera(id=1), vision_config.get_time(),b64_img, b64_img, None, False)
             database.insertImage(new_image)
-        self.image[self.receive] = None
+        if vision_config.ADMIN_REVIEWER == False:
+            self.image[self.receive] = None
         self.receive += 1
 
 class MultiTracker:

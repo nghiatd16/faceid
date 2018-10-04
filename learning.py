@@ -11,7 +11,6 @@ import logging
 import manage_data
 
 
-# def offline_learning(img_dir):
 def offline_learning(dataset_path):
     def extract_info_text(path):
         info = open(path, "r")

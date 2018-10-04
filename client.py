@@ -17,7 +17,7 @@ import pygame
 RUNNING = True
 
 SHOW_GRAPHICS = True
-STREAM = False
+STREAM = True
 HOST = '0.0.0.0'
 PORT = 8080
 
@@ -37,6 +37,8 @@ def sub_task(database, client, graphics=None):
     multi_tracker = MultiTracker()
     client.record()
     train_area = vision_config.TRAINING_AREA
+    if vision_config.ADMIN_REVIEWER:
+        client.admin_reviewer(multi_tracker, database)
     while client.is_running():
         raw_frame = client.get_frame_from_queue()
         if raw_frame is None:
@@ -119,7 +121,7 @@ def sub_task(database, client, graphics=None):
                 FLAG_TRAINING = False
                 time_take_photo = 2
         for idx, tracker in enumerate(trackers):
-            if tracker.person is None and vision_config.MANUAL_IDENTIFY == False:
+            if tracker.person is None:
                 mode, content = client.get_response_identify_service(tracker.id)
                 if mode is not None:
                     if mode == vision_config.IDEN_MOD:
@@ -127,6 +129,8 @@ def sub_task(database, client, graphics=None):
                         if content != -1:
                             predicts = content
                         # multi_tracker.update_identification([tracker], [predicts])
+                        if tracker.judgement is not None:
+                            predicts = tracker.judgement
                         tracker.update_identification(predicts, database)
         if len(unidentified_tracker) > 0:
             for tracker in unidentified_tracker:
@@ -176,7 +180,7 @@ def sub_task(database, client, graphics=None):
                     exit(0)
                 if graphics.key == ord('a') and interface.showing_admin_review == False:
                     interface.showing_admin_review = True
-                    threading.Thread(target=interface.identification_review, args=(database, multi_tracker,), daemon=True).start()
+                    threading.Thread(target=interface.identification_review, args=(database,), daemon=True).start()
     RUNNING = False
     cv2.destroyAllWindows()
 

@@ -15,7 +15,7 @@ STATUS = STATUS_INACTIVE
 STATUS_CONFIRM = 3
 result = None
 msg_result = None
-msg_iden_review = None
+msg_admin_reviewer = None
 showing_admin_review = False
 db = None
 # db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
@@ -249,52 +249,73 @@ def get_information(idCode):
     # root.destroy()
 
 
-def identification_review(database=None, multi_tracker=None):
-    global msg_iden_review
+def identification_review(database=None):
+    global msg_admin_reviewer
     root = Tk()
-    root.title("Identification Admin Review")
+    root.title("Admin Reviewer")
     # root.geometry("500x50+100+100")
     row = Frame(root)
     width_box = 30
     # notice = Label(row, text="Identification Admin Review", width=width_box, font=(16), anchor='w')
     # notice.pack(side=TOP)
-    def call_ok(msg):
-        global msg_iden_review
-        # msg_iden_review = msg
+    def call_ok(judgement):
+        global msg_admin_reviewer
+        if judgement == 'uNk_ClR':
+            person = database.getPersonById(-1)
+        # msg_admin_reviewer = msg
         # tracker = multi_tracker.get_multitracker()[0]
-        # person = database.getPersonByName(msg)
+        else:
+            person = database.getPersonByName(judgement)
         # tracker.person = person
-        print(msg)
+        logging.info("Admin choose {}".format(person))
+        msg_admin_reviewer = person
     def call_cancel(event=None):
         global STATUS, showing_admin_review
         STATUS = STATUS_INPROGRESS
         showing_admin_review = False
         root.destroy()
-    TIS_VIP = ["Toru Kuwano", "Kiyotaka Nakamura", "Hiromitsu Fujino", "Osamu Ishiguro", "Masahiro Mori", "Kensaku Furusho", "Dang Anh Trung"]
-    TV_VIP = ["Hoang To", "Nguyen Quan Son", "Nguyen Khanh Hoan", "Nguyen Son Tung", "Tham Duc Thang", "Nguyen Ich Vinh", "Pham Thuc Truong Luong"]
+    TIS_VIP = ["Toru Kuwano", "Kiyotaka Nakamura", "Hiromitsu Fujino", "Osamu Ishiguro", "Masahiro Mori", "Kensaku Furusho", "Dang Anh Trung", "uNk_ClR"]
+    # TV_VIP = ["Hoang To", "Nguyen Quan Son", "Nguyen Khanh Hoan", "Nguyen Son Tung", "Tham Duc Thang", "Nguyen Ich Vinh", "Pham Thuc Truong Luong"]
     
     #TIS VIP
-    Button(root, text="Mr.Toru Kuwano", width=30, height = 5, command=lambda: call_ok(TIS_VIP[0])).grid(row=0,column=0)
-    Button(root, text="Mr.Kiyotaka Nakamura", width=30, height = 5, command=lambda: call_ok(TIS_VIP[1])).grid(row=1,column=0)
-    Button(root, text="Mr.Hiromitsu Fujino", width=30, height = 5, command=lambda: call_ok(TIS_VIP[2])).grid(row=2,column=0)
-    Button(root, text="Mr.Osamu Ishiguro", width=30, height = 5, command=lambda: call_ok(TIS_VIP[3])).grid(row=3,column=0)
-    Button(root, text="Mr.Masahiro Mori", width=30, height = 5, command=lambda: call_ok(TIS_VIP[4])).grid(row=4,column=0)
-    Button(root, text="Mr.Kensaku Furusho", width=30, height = 5, command=lambda: call_ok(TIS_VIP[5])).grid(row=5,column=0)
-    Button(root, text="Mr.Dang Anh Trung", width=30, height = 5, command=lambda: call_ok(TIS_VIP[6])).grid(row=6,column=0)
+    im0 = Image.open("assets/private/Toru Kuwano.jpg")
+    tkimage0 = ImageTk.PhotoImage(im0)
+    Button(root, image=tkimage0, width=70, height = 70, command=lambda: call_ok(TIS_VIP[0])).grid(row=0,column=0)
+    im1 = Image.open("assets/private/Kiyotaka Nakamura.jpg")
+    tkimage1 = ImageTk.PhotoImage(im1)
+    Button(root, image=tkimage1, width=70, height = 70, command=lambda: call_ok(TIS_VIP[1])).grid(row=0,column=1)
+    im2 = Image.open("assets/private/Hiromitsu Fujino.jpg")
+    tkimage2 = ImageTk.PhotoImage(im2)
+    Button(root, image=tkimage2, width=70, height = 70, command=lambda: call_ok(TIS_VIP[2])).grid(row=1,column=0)
+    im3 = Image.open("assets/private/Osamu Ishiguro.jpg")
+    tkimage3 = ImageTk.PhotoImage(im3)
+    Button(root, image=tkimage3, width=70, height = 70, command=lambda: call_ok(TIS_VIP[3])).grid(row=1,column=1)
+    im4 = Image.open("assets/private/Masahiro Mori.jpg")
+    tkimage4 = ImageTk.PhotoImage(im4)
+    Button(root, image=tkimage4, width=70, height = 70, command=lambda: call_ok(TIS_VIP[4])).grid(row=2,column=0)
+    im5 = Image.open("assets/private/Kensaku Furusho.jpg")
+    tkimage5 = ImageTk.PhotoImage(im5)
+    Button(root, image=tkimage5, width=70, height = 70, command=lambda: call_ok(TIS_VIP[5])).grid(row=2,column=1)
+    im6 = Image.open("assets/private/Dang Anh Trung.jpg")
+    tkimage6 = ImageTk.PhotoImage(im6)
+    Button(root, image=tkimage6, width=70, height = 70, command=lambda: call_ok(TIS_VIP[6])).grid(row=3,column=0)
+    im7 = Image.open("assets/private/clear.jpg")
+    tkimage7 = ImageTk.PhotoImage(im7)
+    Button(root, image=tkimage7, width=70, height = 70, command=lambda: call_ok(TIS_VIP[7])).grid(row=3,column=1)
     
     #TV_VIP
-    Button(root, text="Mr.Hoang To", width=30, height = 5, command=lambda: call_ok(TV_VIP[0])).grid(row=0,column=1)
-    Button(root, text="Mr.Nguyen Quan Son", width=30, height = 5, command=lambda: call_ok(TV_VIP[1])).grid(row=1,column=1)
-    Button(root, text="Mr.Nguyen Khanh Hoan", width=30, height = 5, command=lambda: call_ok(TV_VIP[2])).grid(row=2,column=1)
-    Button(root, text="Mr.Nguyen Son Tung", width=30, height = 5, command=lambda: call_ok(TV_VIP[3])).grid(row=3,column=1)
-    Button(root, text="Mr.Tham Duc Thang", width=30, height = 5, command=lambda: call_ok(TV_VIP[4])).grid(row=4,column=1)
-    Button(root, text="Mr.Nguyen Ich Vinh", width=30, height = 5, command=lambda: call_ok(TV_VIP[5])).grid(row=5,column=1)
-    Button(root, text="Mr.Pham Thuc Truong Luong", width=30, height = 5, command=lambda: call_ok(TV_VIP[6])).grid(row=6,column=1)
+    # Button(root, text="Mr.Hoang To", width=30, height = 5, command=lambda: call_ok(TV_VIP[0])).grid(row=0,column=1)
+    # Button(root, text="Mr.Nguyen Quan Son", width=30, height = 5, command=lambda: call_ok(TV_VIP[1])).grid(row=1,column=1)
+    # Button(root, text="Mr.Nguyen Khanh Hoan", width=30, height = 5, command=lambda: call_ok(TV_VIP[2])).grid(row=2,column=1)
+    # Button(root, text="Mr.Nguyen Son Tung", width=30, height = 5, command=lambda: call_ok(TV_VIP[3])).grid(row=3,column=1)
+    # Button(root, text="Mr.Tham Duc Thang", width=30, height = 5, command=lambda: call_ok(TV_VIP[4])).grid(row=4,column=1)
+    # Button(root, text="Mr.Nguyen Ich Vinh", width=30, height = 5, command=lambda: call_ok(TV_VIP[5])).grid(row=5,column=1)
+    # Button(root, text="Mr.Pham Thuc Truong Luong", width=30, height = 5, command=lambda: call_ok(TV_VIP[6])).grid(row=6,column=1)
 
-    Label(root, text="Custom Name", width=30, font=(16), anchor='w').grid(row=7, column=0)
-    custom_txt = Entry(root, width=30, font=16)
-    custom_txt.grid(row=7, column=1)
-    btn_ok = Button(root, text="OK", width=30, height = 3, command=lambda: call_ok(custom_txt.get())).grid(row=8,column=1)
+    # Label(root, text="Custom Name", width=30, font=(16), anchor='w').grid(row=7, column=0)
+    # custom_txt = Entry(root, width=30, font=16)
+    # custom_txt.grid(row=7, column=1)
+    btn_cancel = Button(root, text="Cancel", width=20, height = 3, command=call_cancel).grid(row=8,column=1)
     root.bind('<Return>', call_cancel)
     root.bind('<Escape>', call_cancel)
     center(root)
@@ -341,5 +362,6 @@ def get_idCode(database):
     # root.destroy()
 if __name__ =="__main__":
     db = Database(vision_config.DB_HOST, vision_config.DB_USER, vision_config.DB_PASSWD, vision_config.DB_NAME)
-    get_idCode(db)
+    # get_idCode(db)
+    identification_review(db)
 # layout_text()
