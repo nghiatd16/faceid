@@ -2,6 +2,7 @@ import mysql.connector
 import object_DL
 import manage_data
 import logging
+import time
 
 class Database:
     def __init__(self, host, user, passwd, database_name):
@@ -18,7 +19,25 @@ class Database:
             logging.info("Connect to database sucessfull")
         except mysql.connector.Error as err:
             logging.exception("ERR in __init__: {}".format(err))
-
+            exit(1)
+    def reconnect_db(self):
+        self.CONNECTED = False
+        tried = 0
+        while not self.CONNECTED:
+            try:
+                tried += 1
+                self.__mydb = mysql.connector.connect(host=self.__host, user=self.__user, passwd=self.__pass, database=self.__dbname)
+                self.__mydb.autocommit = True
+                self.__mycursor = self.__mydb.cursor(dictionary=True)
+                self.CONNECTED = True
+                logging.info("Reconnecting database successed")
+            except mysql.connector.Error as err:
+                logging.error("Reconnecting database failed\n{}".format(err))
+                logging.info("Tried {}/15. Try to reconnect in 5s".format(tried))
+                if tried == 15:
+                    logging.error("Cannot reconnect to database. Please contact the contributors.")
+                    exit(1)
+                time.sleep(5)
     def __standardize_for_query(self, arr):
         cl = ""
         rf = ""
@@ -46,6 +65,8 @@ class Database:
                 return self.__mycursor.fetchone()[0]
             except mysql.connector.Error as err:
                 logging.exception("ERR in countColumnsTable: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
 
     def infoColumnsSchema(self, table, arr_type=["column_name"]):
         if self.CONNECTED:
@@ -60,6 +81,8 @@ class Database:
                 return self.__mycursor.fetchall()
             except mysql.connector.Error as err:
                 logging.exception("ERR in infoColumnsTable: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
 
     def infoTableSchema(self, table, arr_type=["table_name"]):
         if self.CONNECTED:
@@ -74,6 +97,8 @@ class Database:
                 return self.__mycursor.fetchall()
             except mysql.connector.Error as err:
                 logging.exception("ERR in infoColumnsTable: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
 
 ## Insert database:
     def insertPerson(self, person):
@@ -91,6 +116,8 @@ class Database:
                 return person
             except mysql.connector.Error as err:
                 logging.exception("ERR in insertPerson: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
 
@@ -105,6 +132,8 @@ class Database:
                 return camera
             except mysql.connector.Error as err:
                 logging.exception("ERR in insertCamera: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
 
@@ -119,6 +148,8 @@ class Database:
                 return image
             except mysql.connector.Error as err:
                 logging.exception("ERR in insertImage: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
 
@@ -133,6 +164,8 @@ class Database:
                 return location
             except mysql.connector.Error as err:
                 logging.exception("ERR in insertLocation: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
 
@@ -159,6 +192,8 @@ class Database:
                 return results
             except mysql.connector.Error as err:
                 logging.exception("ERR in getPersons: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
     def getPersonByName(self, name):
@@ -181,6 +216,8 @@ class Database:
                 return None
             except mysql.connector.Error as err:
                 logging.exception("ERR in getPersonById: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
     def getPersonById(self, idPerson):
@@ -203,6 +240,8 @@ class Database:
                 return None
             except mysql.connector.Error as err:
                 logging.exception("ERR in getPersonById: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
 
@@ -227,6 +266,8 @@ class Database:
                                             b64image=row['b64Image'])
             except mysql.connector.Error as err:
                 logging.exception("ERR in getPersonByIdCode: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
 
@@ -246,6 +287,8 @@ class Database:
                 return results
             except mysql.connector.Error as err:
                 logging.exception("ERR in getLocations: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
 
@@ -262,6 +305,8 @@ class Database:
                                             location=row['location'])
             except mysql.connector.Error as err:
                 logging.exception("ERR in getLocationById: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
 
@@ -286,6 +331,8 @@ class Database:
                 return results
             except mysql.connector.Error as err:
                 logging.exception("ERR in getCameras: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
 
@@ -307,6 +354,8 @@ class Database:
                                             location=location)
             except mysql.connector.Error as err:
                 logging.exception("ERR in getCameraById: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
 
@@ -350,6 +399,8 @@ class Database:
                 return results
             except mysql.connector.Error as err:
                 logging.exception("ERR in getImages: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
 
@@ -391,6 +442,8 @@ class Database:
                                             istrained=row['isTrained'])
             except mysql.connector.Error as err:
                 logging.exception("ERR in getLocationById: {}".format(err))
+                self.CONNECTED = False
+                self.reconnect_db()
                 return None
         return None
 
@@ -418,6 +471,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in deleteFromPerson: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
             else:
                 sql = "DELETE FROM {}".format(table)
@@ -427,6 +482,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in deleteFromPerson: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
         return False
 
@@ -453,6 +510,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in deleteFromCamera: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
             else:
                 sql = "DELETE FROM {}".format(table)
@@ -462,6 +521,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in deleteFromCamera: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
         return False
 
@@ -488,6 +549,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in deleteFromImage: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
             else:
                 sql = "DELETE FROM {}".format(table)
@@ -497,6 +560,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in deleteFromImage: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
         return False
 
@@ -523,6 +588,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in deleteFromLocation: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
             else:
                 sql = "DELETE FROM {}".format(table)
@@ -532,6 +599,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in deleteFromLocation: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
         return False
 
@@ -569,6 +638,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in updatePerson: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
             else:
                 sql = "UPDATE {} SET {}".format(table, s_columns)
@@ -579,6 +650,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in updatePerson: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
         return False
 
@@ -615,6 +688,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in updateCamera: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
             else:
                 sql = "UPDATE {} SET {}".format(table, s_columns)
@@ -625,6 +700,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in updateCamera: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
         return False
 
@@ -661,6 +738,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in updateLocation: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
             else:
                 sql = "UPDATE {} SET {}".format(table, s_columns)
@@ -671,6 +750,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in updateLocation: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
         return False
 
@@ -707,6 +788,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in updateImage: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
             else:
                 sql = "UPDATE {} SET {}".format(table, s_columns)
@@ -717,6 +800,8 @@ class Database:
                     return True
                 except mysql.connector.Error as err:
                     logging.exception("ERR in updateAllImage: {}".format(err))
+                    self.CONNECTED = False
+                    self.reconnect_db()
                     return False
         return False
 
@@ -735,9 +820,10 @@ if __name__ == "__main__":
     test = Database("localhost", "root", "", "faceid")
     p = object_DL.Person(name='test', birthday=18, gender='female', idcode='123123')
     # rs = test.selectFromPerson(wherePerson=p)
-    rows = test.getImages()
+    rows = test.getPersons()
     for row in rows:
-        print(row.camera.location.location)
+        print(row)
+    test.reconnect_db()
     # for row in rows:
     #     print(row.location)
     
