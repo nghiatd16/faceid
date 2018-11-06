@@ -39,14 +39,14 @@ def find_max_index(disk_dir):
 def save_img(img_faces, name_online, dir_path=vision_config.RAW_IMAGES_DIR):
     path = os.path.abspath(dir_path)
     if not os.path.isdir(path):
-        os.mkdir(path)
+        os.makedirs(path)
     person_path = os.path.join(path, name_online)
     if not os.path.isdir(person_path):
         os.mkdir(person_path)
     for im in img_faces:
         path = os.path.join(person_path, str(time.time()) + '.jpg')
         cv2.imwrite(path, im)
-        logging.info('Write an image on:'.format(path))
+        logging.info('Write an image on: {}'.format(path))
 
 def std_date_format(date):
     if date is None:

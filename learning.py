@@ -132,7 +132,7 @@ def online_learning_service(bbox_faces, img_faces, client, info_pack, multiTrack
     if len(img_faces) == 0:
         return
     msg, name, birthday, gender, idCode, country, description, b64Img, idCam, embedding_list = info_pack
-    # manage_data.save_img(img_faces, name)
+    manage_data.save_img(img_faces, name)
     # new_thumb = cv2.resize(img_faces[0], (50,50))
     
     embed_vector = np.mean(embedding_list, axis=0)

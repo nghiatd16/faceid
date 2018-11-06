@@ -1,4 +1,4 @@
-import manage_data
+import json
 class Camera:
     def __init__(self, id=None, cameraname=None, httpurl=None, rstpurl=None, location=None):
         self.id = id
@@ -27,7 +27,13 @@ class Camera:
         if self.location is not None and isinstance(self.location, Location):
             self.idlocation = self.location.id
         return (self.id, self.cameraname, self.httpurl, self.rstpurl, self.idlocation)
-    
+    def to_json_string(self):
+        name_cols = self.get_arr_name_columns()
+        attr_dict = {}
+        for key in name_cols:
+            attr_dict[key] = getattr(self, key)
+        return json.dumps(attr_dict)
+        
     def __str__(self):
         return "[id: {} - cameraName: {} - httpurl: {} - rstpurl: {} - location: {}]".format(self.id, self.httpurl, self.rstpurl, self.location)
 

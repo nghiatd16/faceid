@@ -8,6 +8,8 @@ import manage_data
 from interact_database_v2 import Database
 from object_DL import Person
 from PIL import Image, ImageTk
+import uuid
+import random as rd
 STATUS_INACTIVE = 0
 STATUS_INPROGRESS = 1
 STATUS_DONE = 2
@@ -320,6 +322,19 @@ def identification_review(database=None):
     root.bind('<Escape>', call_cancel)
     center(root)
     root.mainloop()
+
+def auto_gen_info(db):
+    idCode = rd.randint(100000, 1000000)
+    while db.getPersonByIdCode(str(idCode)) is not None:
+        idCode = rd.randint(100000, 1000000)
+    idCode = str(idCode)
+    name_txt = str(uuid.uuid4())
+    birthday_txt = "1/1/1990"
+    gender_txt = "male"
+    country_txt = "vn"
+    des_txt = "NULL"
+    new_p = Person(name=name_txt, birthday=birthday_txt, idcode=idCode, gender=gender_txt, country=country_txt, description=des_txt)
+    response_learning_OK(vision_config.NEW_LEARNING_MSG, new_p)
 
 def get_idCode(database):
     global STATUS, label, db

@@ -17,7 +17,7 @@ import pygame
 RUNNING = True
 
 SHOW_GRAPHICS = True
-STREAM = True
+STREAM = vision_config.STREAM
 HOST = '0.0.0.0'
 PORT = 8080
 
@@ -178,9 +178,12 @@ def sub_task(database, client, graphics=None):
                 if graphics.key == 27:
                     RUNNING = False
                     exit(0)
-                if graphics.key == ord('a') and interface.showing_admin_review == False:
-                    interface.showing_admin_review = True
+                # if graphics.key == ord('a') and interface.showing_admin_review == False:
+                #     interface.showing_admin_review = True
                     threading.Thread(target=interface.identification_review, args=(database,), daemon=True).start()
+                if graphics.key == ord('m') and not FLAG_TRAINING and interface.STATUS == interface.STATUS_INACTIVE:
+                    threading.Thread(target=interface.auto_gen_info, args=(database,), daemon=True).start()
+                    continue
     RUNNING = False
     cv2.destroyAllWindows()
 
