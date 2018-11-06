@@ -184,6 +184,16 @@ def sub_task(database, client, graphics=None):
                 if graphics.key == ord('m') and not FLAG_TRAINING and interface.STATUS == interface.STATUS_INACTIVE:
                     threading.Thread(target=interface.auto_gen_info, args=(database,), daemon=True).start()
                     continue
+                if graphics.key == ord('q') and FLAG_TRAINING:
+                    info_pack = None
+                    bbox_list_online.clear()
+                    img_list_online.clear()
+                    FLAG_TRAINING = False
+                    FLAG_TAKE_PHOTO = False
+                    interface.reset()
+                    name_interface = None
+                    time_take_photo = 2
+
     RUNNING = False
     cv2.destroyAllWindows()
 
