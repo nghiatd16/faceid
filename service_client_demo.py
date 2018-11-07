@@ -37,7 +37,7 @@ class ClientService:
                 pass
             logging.info("Video Capture device is camera ".format(camera))
         else:
-            self.capture = cv2.VideoCapture(0)
+            self.capture = cv2.VideoCapture(1)
             logging.info("Video Capture device is default webcam")
         self.capture.set(cv2.CAP_PROP_FPS, 60)
         width = self.capture.get(3)

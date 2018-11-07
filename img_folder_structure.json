@@ -1,0 +1,9 @@
+{
+    "img_logs":{
+        "time": ["year", "month", "day"],
+        "identification": ["Unknown", "Identified"],
+        "kind_image": ["face", "full_background"]
+    },
+    ""
+
+}

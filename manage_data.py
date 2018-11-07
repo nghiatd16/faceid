@@ -46,7 +46,7 @@ def save_img(img_faces, name_online, dir_path=vision_config.RAW_IMAGES_DIR):
     for im in img_faces:
         path = os.path.join(person_path, str(time.time()) + '.jpg')
         cv2.imwrite(path, im)
-        logging.info('Write an image on: {}'.format(path))
+    logging.info('Wrote {} images on: {} successfully'.format(len(img_faces), person_path))
 
 def std_date_format(date):
     if date is None:

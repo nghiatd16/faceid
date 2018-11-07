@@ -23,9 +23,12 @@ PORT = 8080
 
 FLAG_TRAINING = False
 FLAG_TAKE_PHOTO = False
+FLAG_COUNTING = False
+count_down = 5
+count_down_timer = time.time()
 info_pack = ()
 tim_elapsed = 0.4
-time_take_photo = 2
+time_take_photo = 4
 bbox_list_online = []
 img_list_online = []
 timer = time.time()
@@ -33,6 +36,7 @@ train_timer = time.time()
 
 def sub_task(database, client, graphics=None):
     global RUNNING, info_pack, SHOW_GRAPHICS, STREAM, FLAG_TAKE_PHOTO, FLAG_TRAINING, timer, train_timer, time_take_photo, tim_elapsed, bbox_list_online, img_list_online
+    global count_down, count_down_timer, FLAG_COUNTING
     client.subscribe_server()
     multi_tracker = MultiTracker()
     client.record()
@@ -55,6 +59,7 @@ def sub_task(database, client, graphics=None):
         trackers = multi_tracker.get_multitracker()
         if interface.STATUS == interface.STATUS_DONE and not FLAG_TRAINING:
             FLAG_TRAINING = True
+            count_down = 5
             person = interface.result
             name = person.name
             birthday = person.birthday
@@ -68,7 +73,29 @@ def sub_task(database, client, graphics=None):
                 idCam = client.camera.id
             info_pack = (interface.msg_result, name, birthday, gender, idCode, country, description, b64img, idCam)
             interface.reset()
-        if FLAG_TRAINING:
+        if FLAG_COUNTING and FLAG_TRAINING and count_down > 0:
+            if(time.time() - count_down_timer) >= 1:
+                count_down -= 1
+                count_down_timer = time.time()
+        if count_down > 0 and FLAG_TRAINING:
+            if FLAG_COUNTING:
+                cv2.putText(frame, "COUNT DOWN", \
+                                (train_area[0] + 10, train_area[1] + 50), cv2.FONT_HERSHEY_SIMPLEX, \
+                                vision_config.FONT_SIZE+1, vision_config.NEG_COLOR, \
+                                vision_config.LINE_THICKNESS*2, cv2.LINE_AA)
+                cv2.putText(frame, str(count_down), \
+                                (train_area[0] + 100, train_area[1] + 200), cv2.FONT_HERSHEY_SIMPLEX, \
+                                vision_config.FONT_SIZE+3, vision_config.NEG_COLOR, \
+                                vision_config.LINE_THICKNESS*2, cv2.LINE_AA)
+            else:
+                cv2.putText(frame, "READY TO TRAIN", \
+                                (train_area[0] + 10, train_area[1] + 50), cv2.FONT_HERSHEY_SIMPLEX, \
+                                vision_config.FONT_SIZE+1, vision_config.NEG_COLOR, \
+                                vision_config.LINE_THICKNESS*2, cv2.LINE_AA)
+        else:
+            FLAG_COUNTING = False
+            FLAG_TAKE_PHOTO = True
+        if FLAG_TRAINING and count_down <= 0:
             if time_take_photo > 0.2:
                 cv2.rectangle(frame, (train_area[0], train_area[1]) , \
                                 (train_area[2], train_area[3]), \
@@ -107,6 +134,7 @@ def sub_task(database, client, graphics=None):
                             FLAG_TRAINING = False
                             name_interface = None
                             time_take_photo = 2
+                            count_down = 5
             if FLAG_TAKE_PHOTO == False and len(bbox_list_online) > 0:
                 # learning.online_learning(bbox_list_online, img_list_online, \
                 #                                     info_pack, vision_object, multi_tracker, database)
@@ -120,6 +148,7 @@ def sub_task(database, client, graphics=None):
                 img_list_online.clear()
                 FLAG_TRAINING = False
                 time_take_photo = 2
+                count_down = 5
         for idx, tracker in enumerate(trackers):
             if tracker.person is None:
                 mode, content = client.get_response_identify_service(tracker.id)
@@ -173,8 +202,9 @@ def sub_task(database, client, graphics=None):
                 if graphics.key == 32 and not FLAG_TRAINING and interface.STATUS == interface.STATUS_INACTIVE:
                     threading.Thread(target=interface.get_idCode, args=(database,), daemon=True).start()
                     continue
-                if graphics.key == 32 and FLAG_TRAINING:
-                    FLAG_TAKE_PHOTO = True
+                if graphics.key == 32 and FLAG_TRAINING and count_down == 5:
+                    FLAG_COUNTING = True
+                    count_down_timer = time.time()
                 if graphics.key == 27:
                     RUNNING = False
                     exit(0)
@@ -193,6 +223,8 @@ def sub_task(database, client, graphics=None):
                     interface.reset()
                     name_interface = None
                     time_take_photo = 2
+                    FLAG_COUNTING = False
+                    count_down = 5
 
     RUNNING = False
     cv2.destroyAllWindows()

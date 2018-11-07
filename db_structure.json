@@ -1,0 +1,9 @@
+{
+    "faceid":{
+        "person": ["id", "name", "unicodeName", "birthDay", "gender", "idCode", "country", "description" ,"embedding", "face", "avatar"],
+        "location": ["id", "longtitude", "latitude", "address"],
+        "camera": ["id", "cameraName", "HTTPUrl", "RSTPUrl", "outHTTPUrl", "idLocation"],
+        "image": ["id", "idPerson", "idCamera", "time", "face", "image", "embedding", "isTrained"]
+    }
+    
+}

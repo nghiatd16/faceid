@@ -329,7 +329,7 @@ def auto_gen_info(db):
         idCode = rd.randint(100000, 1000000)
     idCode = str(idCode)
     name_txt = str(uuid.uuid4())
-    birthday_txt = "1/1/1990"
+    birthday_txt = manage_data.std_date_format("1/1/1990")
     gender_txt = "male"
     country_txt = "vn"
     des_txt = "NULL"

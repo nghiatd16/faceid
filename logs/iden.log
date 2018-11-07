@@ -1,0 +1,137 @@
+[INFO|2018-11-07 14:01:08] Connect to database sucessfull
+[INFO|2018-11-07 14:01:08] An vision object has been created with mode `only_identify`
+2018-11-07 14:01:08.055228: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+[INFO|2018-11-07 14:01:11] Saver not created because there are no variables in the graph to restore
+[INFO|2018-11-07 14:01:11] The specified SavedModel has no variables; no checkpoints were restored.
+[INFO|2018-11-07 14:01:11] Service identify is running ...
+[INFO|2018-11-07 14:05:24] prediction: None; verdict: d38eed75-3132-4a95-8097-4c34f3150f9c; distance: 0.21912216798328163
+[INFO|2018-11-07 14:05:24] prediction: None; verdict: bbf45baf-d09b-43bd-aaf7-8c1214135eab; distance: 0.22913692478712497
+[INFO|2018-11-07 14:05:24] prediction: 76-d38eed75-3132-4a95-8097-4c34f3150f9c; verdict: d38eed75-3132-4a95-8097-4c34f3150f9c; distance: 0.18639086673248875
+[INFO|2018-11-07 14:05:24] prediction: 76-d38eed75-3132-4a95-8097-4c34f3150f9c; verdict: d38eed75-3132-4a95-8097-4c34f3150f9c; distance: 0.19066379900897365
+[INFO|2018-11-07 14:05:34] prediction: 76-d38eed75-3132-4a95-8097-4c34f3150f9c; verdict: d38eed75-3132-4a95-8097-4c34f3150f9c; distance: 0.15107022355941638
+[INFO|2018-11-07 14:05:39] prediction: None; verdict: 27a0bb43-f952-4b62-9935-829ddc98927f; distance: 0.20858670440813462
+[INFO|2018-11-07 14:05:39] prediction: None; verdict: bbf45baf-d09b-43bd-aaf7-8c1214135eab; distance: 0.20146504333550697
+[INFO|2018-11-07 14:20:37] prediction: None; verdict: Tran Dai Nghia; distance: 0.2600333422210372
+[INFO|2018-11-07 14:20:38] prediction: None; verdict: Tran Dai Nghia; distance: 0.2221944782351372
+[INFO|2018-11-07 14:20:38] prediction: 76-d38eed75-3132-4a95-8097-4c34f3150f9c; verdict: d38eed75-3132-4a95-8097-4c34f3150f9c; distance: 0.18795324535221358
+[INFO|2018-11-07 14:20:42] prediction: None; verdict: Tran Dai Nghia; distance: 0.20061672979591463
+[INFO|2018-11-07 14:20:42] prediction: 76-d38eed75-3132-4a95-8097-4c34f3150f9c; verdict: d38eed75-3132-4a95-8097-4c34f3150f9c; distance: 0.18694841700651044
+[INFO|2018-11-07 14:20:44] prediction: None; verdict: Tran Dai Nghia; distance: 0.20585778079641323
+[INFO|2018-11-07 14:20:44] prediction: None; verdict: d38eed75-3132-4a95-8097-4c34f3150f9c; distance: 0.20726798997599738
+[INFO|2018-11-07 14:20:45] prediction: None; verdict: Tran Dai Nghia; distance: 0.21867034865183346
+[INFO|2018-11-07 14:20:45] prediction: None; verdict: Tran Dai Nghia; distance: 0.251618101706846
+[INFO|2018-11-07 14:20:45] prediction: None; verdict: Tran Dai Nghia; distance: 0.2742780054234461
+[INFO|2018-11-07 14:22:07] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.18472614879737048
+[INFO|2018-11-07 14:22:08] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.1945747595556662
+[INFO|2018-11-07 14:22:14] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.1888128042924956
+[INFO|2018-11-07 14:22:16] prediction: None; verdict: bbf45baf-d09b-43bd-aaf7-8c1214135eab; distance: 0.23489418471661633
+[INFO|2018-11-07 14:22:16] prediction: None; verdict: Tran Dai Nghia; distance: 0.24461815963638384
+[INFO|2018-11-07 14:22:16] prediction: None; verdict: d38eed75-3132-4a95-8097-4c34f3150f9c; distance: 0.2279137516906352
+[INFO|2018-11-07 14:22:17] prediction: None; verdict: Tran Dai Nghia; distance: 0.25165786231925147
+[INFO|2018-11-07 14:22:17] prediction: None; verdict: Tran Dai Nghia; distance: 0.2286673120144375
+[INFO|2018-11-07 14:22:18] prediction: None; verdict: Tran Dai Nghia; distance: 0.20671009148082276
+[INFO|2018-11-07 14:22:18] prediction: None; verdict: Tran Dai Nghia; distance: 0.2078046802464205
+[INFO|2018-11-07 14:22:18] prediction: None; verdict: Tran Dai Nghia; distance: 0.20562407644185862
+[INFO|2018-11-07 14:22:19] prediction: None; verdict: Tran Dai Nghia; distance: 0.2138338433061035
+[INFO|2018-11-07 14:22:19] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.1968003751057178
+[INFO|2018-11-07 14:22:22] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.18431948899976835
+[INFO|2018-11-07 14:22:24] prediction: None; verdict: Tran Dai Nghia; distance: 0.2576503831420115
+[INFO|2018-11-07 14:22:24] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.18895758330853654
+[INFO|2018-11-07 14:22:27] prediction: None; verdict: Tran Dai Nghia; distance: 0.27548060761831206
+[INFO|2018-11-07 14:22:27] prediction: None; verdict: 1f380410-a03b-4a78-845e-93fd60c42174; distance: 0.273650287772128
+[INFO|2018-11-07 14:22:28] prediction: None; verdict: Toru Kuwano; distance: 0.22624610288330302
+[INFO|2018-11-07 14:22:28] prediction: None; verdict: Tran Dai Nghia; distance: 0.22672519739718452
+[INFO|2018-11-07 14:22:28] prediction: None; verdict: Tran Dai Nghia; distance: 0.24300220783697857
+[INFO|2018-11-07 14:22:29] prediction: None; verdict: Tran Dai Nghia; distance: 0.22945071207247025
+[INFO|2018-11-07 14:22:29] prediction: None; verdict: Toru Kuwano; distance: 0.30417367335872275
+[INFO|2018-11-07 14:22:29] prediction: None; verdict: Tran Dai Nghia; distance: 0.26868492138571864
+[INFO|2018-11-07 14:22:30] prediction: None; verdict: Tran Dai Nghia; distance: 0.21138146587079804
+[INFO|2018-11-07 14:22:31] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.18689861698461044
+[INFO|2018-11-07 14:22:34] prediction: None; verdict: bbf45baf-d09b-43bd-aaf7-8c1214135eab; distance: 0.24951974743937846
+[INFO|2018-11-07 14:22:34] prediction: None; verdict: 1f380410-a03b-4a78-845e-93fd60c42174; distance: 0.3013552214323148
+[INFO|2018-11-07 14:22:35] prediction: None; verdict: Tran Dai Nghia; distance: 0.22899027130004748
+[INFO|2018-11-07 14:22:35] prediction: None; verdict: Tran Dai Nghia; distance: 0.25463588054940933
+[INFO|2018-11-07 14:22:40] prediction: None; verdict: Tran Dai Nghia; distance: 0.2752352212846376
+[INFO|2018-11-07 14:22:41] prediction: None; verdict: 1f380410-a03b-4a78-845e-93fd60c42174; distance: 0.2905371248978434
+[INFO|2018-11-07 14:22:42] prediction: None; verdict: Tran Dai Nghia; distance: 0.21475858408142323
+[INFO|2018-11-07 14:22:42] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.1942156690936288
+[INFO|2018-11-07 14:22:43] prediction: None; verdict: Tran Dai Nghia; distance: 0.24998058422154562
+[INFO|2018-11-07 14:22:43] prediction: None; verdict: Tran Dai Nghia; distance: 0.2484096499950252
+[INFO|2018-11-07 14:22:44] prediction: None; verdict: Tran Dai Nghia; distance: 0.2320286794047157
+[INFO|2018-11-07 14:22:44] prediction: None; verdict: Tran Dai Nghia; distance: 0.2412370272280704
+[INFO|2018-11-07 14:22:44] prediction: None; verdict: Tran Dai Nghia; distance: 0.2571909351038057
+[INFO|2018-11-07 14:23:59] prediction: None; verdict: Toru Kuwano; distance: 0.2900366892177114
+[INFO|2018-11-07 14:23:59] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.19545197612690948
+[INFO|2018-11-07 14:25:23] prediction: 73-Toru Kuwano; verdict: Toru Kuwano; distance: 0.14130681626990865
+[INFO|2018-11-07 14:25:24] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.19006363306808988
+[INFO|2018-11-07 14:25:39] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.1948840250449922
+[INFO|2018-11-07 14:25:39] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.18779016378339608
+[INFO|2018-11-07 14:25:39] prediction: 72-Tran Dai Nghia; verdict: Tran Dai Nghia; distance: 0.19844426120330572
+[INFO|2018-11-07 14:25:39] prediction: None; verdict: d38eed75-3132-4a95-8097-4c34f3150f9c; distance: 0.20810456303979358
+[INFO|2018-11-07 14:25:39] prediction: None; verdict: Tran Dai Nghia; distance: 0.24951001282750196
+[INFO|2018-11-07 14:25:39] prediction: None; verdict: Tran Dai Nghia; distance: 0.20501351463164683
+[INFO|2018-11-07 14:25:40] Refetch database succesfull. Before-After refetch 8 - 9 person(s)
+[INFO|2018-11-07 14:25:40] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.13697990459561632
+[INFO|2018-11-07 14:25:48] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.10042192448336741
+[INFO|2018-11-07 14:25:48] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.08420053598435434
+[INFO|2018-11-07 14:25:48] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.13499667122486872
+[INFO|2018-11-07 14:25:49] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.0826984457493203
+[INFO|2018-11-07 14:25:49] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.10002121228946678
+[INFO|2018-11-07 14:25:49] Refetch database succesfull. Before-After refetch 9 - 10 person(s)
+[INFO|2018-11-07 14:25:50] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.07976159936654657
+[INFO|2018-11-07 14:29:20] prediction: None; verdict: Toru Kuwano; distance: 0.2677096498400365
+[INFO|2018-11-07 14:29:21] prediction: 76-d38eed75-3132-4a95-8097-4c34f3150f9c; verdict: d38eed75-3132-4a95-8097-4c34f3150f9c; distance: 0.17413499935175122
+[INFO|2018-11-07 14:29:27] prediction: 76-d38eed75-3132-4a95-8097-4c34f3150f9c; verdict: d38eed75-3132-4a95-8097-4c34f3150f9c; distance: 0.16345071299361533
+[INFO|2018-11-07 14:29:53] prediction: 82-0d5fcafd-69a0-416f-b59a-7cd774e0e18f; verdict: 0d5fcafd-69a0-416f-b59a-7cd774e0e18f; distance: 0.18284146948852953
+[INFO|2018-11-07 14:30:28] prediction: None; verdict: Toru Kuwano; distance: 0.22158600557467528
+[INFO|2018-11-07 14:30:29] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.15767413738180927
+[INFO|2018-11-07 14:30:53] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.16209407880423093
+[INFO|2018-11-07 14:31:49] prediction: 73-Toru Kuwano; verdict: Toru Kuwano; distance: 0.19762411089453152
+[INFO|2018-11-07 14:31:49] prediction: 82-0d5fcafd-69a0-416f-b59a-7cd774e0e18f; verdict: 0d5fcafd-69a0-416f-b59a-7cd774e0e18f; distance: 0.13842263395082785
+[INFO|2018-11-07 14:32:07] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.11908764514684461
+[INFO|2018-11-07 14:32:07] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.11548267584494858
+[INFO|2018-11-07 14:32:07] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.12329280368006555
+[INFO|2018-11-07 14:32:08] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.11273088861445912
+[INFO|2018-11-07 14:32:08] prediction: None; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.2560759375098214
+[INFO|2018-11-07 14:32:08] prediction: None; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.2566837000979478
+[INFO|2018-11-07 14:32:08] prediction: None; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.2990705356033274
+[INFO|2018-11-07 14:32:08] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.15067165339880867
+[INFO|2018-11-07 14:32:08] prediction: 82-0d5fcafd-69a0-416f-b59a-7cd774e0e18f; verdict: 0d5fcafd-69a0-416f-b59a-7cd774e0e18f; distance: 0.12299101455526025
+[INFO|2018-11-07 14:32:08] prediction: 82-0d5fcafd-69a0-416f-b59a-7cd774e0e18f; verdict: 0d5fcafd-69a0-416f-b59a-7cd774e0e18f; distance: 0.13797888917842485
+[INFO|2018-11-07 14:32:08] prediction: 82-0d5fcafd-69a0-416f-b59a-7cd774e0e18f; verdict: 0d5fcafd-69a0-416f-b59a-7cd774e0e18f; distance: 0.1769049954146037
+[INFO|2018-11-07 14:32:08] prediction: 82-0d5fcafd-69a0-416f-b59a-7cd774e0e18f; verdict: 0d5fcafd-69a0-416f-b59a-7cd774e0e18f; distance: 0.17799069798550968
+[INFO|2018-11-07 14:32:08] prediction: 82-0d5fcafd-69a0-416f-b59a-7cd774e0e18f; verdict: 0d5fcafd-69a0-416f-b59a-7cd774e0e18f; distance: 0.12941928527554558
+[INFO|2018-11-07 14:32:08] prediction: 82-0d5fcafd-69a0-416f-b59a-7cd774e0e18f; verdict: 0d5fcafd-69a0-416f-b59a-7cd774e0e18f; distance: 0.11070118623005323
+[INFO|2018-11-07 14:32:08] prediction: 82-0d5fcafd-69a0-416f-b59a-7cd774e0e18f; verdict: 0d5fcafd-69a0-416f-b59a-7cd774e0e18f; distance: 0.1064849887113156
+[INFO|2018-11-07 14:32:09] Refetch database succesfull. Before-After refetch 10 - 11 person(s)
+[INFO|2018-11-07 14:32:10] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.11609028788924716
+[INFO|2018-11-07 14:33:12] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.09779899917589804
+[INFO|2018-11-07 14:33:35] prediction: 81-abbdf37e-0595-4e82-88cb-fdb23246fc7b; verdict: abbdf37e-0595-4e82-88cb-fdb23246fc7b; distance: 0.11632143603863797
+[INFO|2018-11-07 14:33:35] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.10089284339449202
+[INFO|2018-11-07 14:33:35] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.10589520771192533
+[INFO|2018-11-07 14:33:35] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.08991406672899452
+[INFO|2018-11-07 14:33:35] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.11615436810445007
+[INFO|2018-11-07 14:33:35] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.1317604962436432
+[INFO|2018-11-07 14:33:35] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.1092248632646886
+[INFO|2018-11-07 14:33:35] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.08894346590544942
+[INFO|2018-11-07 14:33:36] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.16972571652226787
+[INFO|2018-11-07 14:33:36] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.18699970839101554
+[INFO|2018-11-07 14:33:36] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.1759087736848509
+[INFO|2018-11-07 14:33:37] Refetch database succesfull. Before-After refetch 11 - 12 person(s)
+[INFO|2018-11-07 14:33:37] prediction: 84-6cf916bd-439a-4f2e-9114-44f158c9d731; verdict: 6cf916bd-439a-4f2e-9114-44f158c9d731; distance: 0.07386783611171689
+[INFO|2018-11-07 14:33:43] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.17165566117332826
+[INFO|2018-11-07 14:33:45] prediction: 84-6cf916bd-439a-4f2e-9114-44f158c9d731; verdict: 6cf916bd-439a-4f2e-9114-44f158c9d731; distance: 0.11701680272755528
+[INFO|2018-11-07 14:37:32] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.1524389904100736
+[INFO|2018-11-07 14:37:46] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.11543491821561765
+[INFO|2018-11-07 14:37:46] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.10218382674526331
+[INFO|2018-11-07 14:37:46] prediction: 83-f0707465-a846-45d6-a5d4-96f9c7d47ffd; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.09469154017374208
+[INFO|2018-11-07 14:37:46] prediction: None; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.20648581993504297
+[INFO|2018-11-07 14:37:46] prediction: None; verdict: f0707465-a846-45d6-a5d4-96f9c7d47ffd; distance: 0.29649367651149894
+[INFO|2018-11-07 14:37:47] prediction: 84-6cf916bd-439a-4f2e-9114-44f158c9d731; verdict: 6cf916bd-439a-4f2e-9114-44f158c9d731; distance: 0.08829259063645216
+[INFO|2018-11-07 14:37:47] prediction: 84-6cf916bd-439a-4f2e-9114-44f158c9d731; verdict: 6cf916bd-439a-4f2e-9114-44f158c9d731; distance: 0.12574487786091998
+[INFO|2018-11-07 14:37:47] prediction: 84-6cf916bd-439a-4f2e-9114-44f158c9d731; verdict: 6cf916bd-439a-4f2e-9114-44f158c9d731; distance: 0.18612962374103156
+[INFO|2018-11-07 14:37:47] prediction: 84-6cf916bd-439a-4f2e-9114-44f158c9d731; verdict: 6cf916bd-439a-4f2e-9114-44f158c9d731; distance: 0.1290257503038691
+[INFO|2018-11-07 14:37:47] prediction: 82-0d5fcafd-69a0-416f-b59a-7cd774e0e18f; verdict: 0d5fcafd-69a0-416f-b59a-7cd774e0e18f; distance: 0.12729111540712135
+[INFO|2018-11-07 14:37:48] Refetch database succesfull. Before-After refetch 12 - 13 person(s)
+[INFO|2018-11-07 14:37:48] prediction: None; verdict: 759b8bf3-4548-4acd-8a7c-c109d2cb0ae7; distance: 0.23018150925470626
+[INFO|2018-11-07 14:37:48] prediction: 82-0d5fcafd-69a0-416f-b59a-7cd774e0e18f; verdict: 0d5fcafd-69a0-416f-b59a-7cd774e0e18f; distance: 0.08834668796490557
