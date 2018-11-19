@@ -16,7 +16,7 @@ import pygame
 
 RUNNING = True
 
-SHOW_GRAPHICS = True
+SHOW_GRAPHICS = False
 STREAM = vision_config.STREAM
 HOST = '0.0.0.0'
 PORT = 8080
@@ -24,7 +24,7 @@ PORT = 8080
 FLAG_TRAINING = False
 FLAG_TAKE_PHOTO = False
 FLAG_COUNTING = False
-count_down = 5
+count_down = 3
 count_down_timer = time.time()
 info_pack = ()
 tim_elapsed = 0.4
@@ -59,7 +59,7 @@ def sub_task(database, client, graphics=None):
         trackers = multi_tracker.get_multitracker()
         if interface.STATUS == interface.STATUS_DONE and not FLAG_TRAINING:
             FLAG_TRAINING = True
-            count_down = 5
+            count_down = 3
             person = interface.result
             name = person.name
             birthday = person.birthday
@@ -133,8 +133,8 @@ def sub_task(database, client, graphics=None):
                             img_list_online.clear()
                             FLAG_TRAINING = False
                             name_interface = None
-                            time_take_photo = 2
-                            count_down = 5
+                            time_take_photo = 4
+                            count_down = 3
             if FLAG_TAKE_PHOTO == False and len(bbox_list_online) > 0:
                 # learning.online_learning(bbox_list_online, img_list_online, \
                 #                                     info_pack, vision_object, multi_tracker, database)
@@ -147,8 +147,8 @@ def sub_task(database, client, graphics=None):
                 bbox_list_online.clear()
                 img_list_online.clear()
                 FLAG_TRAINING = False
-                time_take_photo = 2
-                count_down = 5
+                time_take_photo = 4
+                count_down = 3
         for idx, tracker in enumerate(trackers):
             if tracker.person is None:
                 mode, content = client.get_response_identify_service(tracker.id)
@@ -202,7 +202,7 @@ def sub_task(database, client, graphics=None):
                 if graphics.key == 32 and not FLAG_TRAINING and interface.STATUS == interface.STATUS_INACTIVE:
                     threading.Thread(target=interface.get_idCode, args=(database,), daemon=True).start()
                     continue
-                if graphics.key == 32 and FLAG_TRAINING and count_down == 5:
+                if graphics.key == 32 and FLAG_TRAINING and count_down == 3:
                     FLAG_COUNTING = True
                     count_down_timer = time.time()
                 if graphics.key == 27:
@@ -222,9 +222,9 @@ def sub_task(database, client, graphics=None):
                     FLAG_TAKE_PHOTO = False
                     interface.reset()
                     name_interface = None
-                    time_take_photo = 2
+                    time_take_photo = 4
                     FLAG_COUNTING = False
-                    count_down = 5
+                    count_down = 3
 
     RUNNING = False
     cv2.destroyAllWindows()
@@ -259,9 +259,10 @@ def start_web():
     threading.Thread(target=gen_frame, args=(), daemon=True).start()
     threading.Thread(target=app.run, args=(HOST, PORT, False), daemon=True).start()
 
-def start(cam_id = None, port=8888):
+def start(cam_id = None, port=8888, show_graphhics=False):
     global STREAM, SHOW_GRAPHICS, PORT
     PORT = port
+    SHOW_GRAPHICS = show_graphhics
     database = Database(vision_config.DB_HOST,vision_config.DB_USER,vision_config.DB_PASSWD, vision_config.DB_NAME)
     cam = None
     if cam_id is not None:
@@ -271,12 +272,12 @@ def start(cam_id = None, port=8888):
         sub_task(database, client)
     else:
         if SHOW_GRAPHICS and not STREAM:
-            graphics = GraphicOpenCV(display=True, queue=None)
+            graphics = GraphicOpenCV(display=True, queue=None);
         elif SHOW_GRAPHICS and STREAM:
-            graphics = GraphicOpenCV(display=True, queue=q_FRAME)
+            graphics = GraphicOpenCV(display=True, queue=q_FRAME);
             start_web()
         elif not SHOW_GRAPHICS and STREAM:
-            graphics = GraphicOpenCV(display=False, queue=q_FRAME)
+            graphics = GraphicOpenCV(display=False, queue=q_FRAME);
             start_web()
         threading.Thread(target=sub_task, args=(database, client, graphics,), daemon=True).start()
         graphics.run()

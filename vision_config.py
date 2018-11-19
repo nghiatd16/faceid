@@ -11,7 +11,7 @@ RAW_IMAGES_DIR = 'images'
 #http://192.168.137.214:8080/video
 DB_HOST = 'localhost'
 DB_USER = 'root'
-DB_PASSWD = ''
+DB_PASSWD = 'root'
 DB_NAME = 'faceid'
 
 # Model Config
@@ -21,15 +21,15 @@ DETECT_DEVICE = 'auto'
 ENCODE_EMBEDD_DEVICE = 'auto'
 IDENTIFICATION_THRESH_HOLD = 0.20
 # IDENTIFICATION_THRESH_HOLD = 0.64
-BIGGEST_FACE = True
-ADMIN_REVIEWER = True
-DETECT_SCALE = 1
+BIGGEST_FACE = False
+ADMIN_REVIEWER = False
+DETECT_SCALE = 2
 FLIP = True
 ENRICH_DATA = False
 NUM_TRIED = 5
 DELAY_TRIED = 0.3
 # Screen config 
-INPUT_SCALE = 1
+INPUT_SCALE = 2
 SHOW_LOCAL_SCREEN = True
 SIZE_OF_INPUT_IMAGE = 160
 POS_COLOR = (0, 255, 0)
@@ -50,7 +50,7 @@ TRAINING_AREA = (320-128, 0, 320+128, 480)
 PADDING = 5
 SHOW_LOG_PREDICTION = True
 SHOW_LOG_TRACKING = False
-DEBUG_MOD = True
+DEBUG_MOD = False
 
 # Some necessary funtion
 def set_screen_size(w, h):
@@ -91,7 +91,7 @@ FLAG_REFETCH_DB = "-REFETCH_DB"
 #Service client config
 TRANSFER_LEARNING_MSG = "Transfer Learning"
 NEW_LEARNING_MSG = "New Learning"
-STREAM = False
+STREAM = True
 def set_service_token(token):
     global SERVICE_TOKEN, SERVICE_REGISTER_CLIENT , SERVICE_REGISTER_WORKER, IDENTIFY_QUEUE
     SERVICE_TOKEN = token
